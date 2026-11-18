@@ -1,0 +1,214 @@
+{#include base}
+{#title}Hilfe{/title}
+<div class="help">
+<p><button type="button" class="link-btn" onclick="history.length > 1 ? history.back() : location.href='/'">← Zurück</button></p>
+<h1>Hilfe</h1>
+<p class="lead">Doorman prüft am Einlass per QR-Code, ob jemand zur Veranstaltung angemeldet ist, und zeigt sofort grün, orange
+  oder rot. Jeder Teilnehmer bekommt vorab seinen persönlichen QR-Code per E-Mail und zeigt ihn am Veranstaltungstag vor.</p>
+
+<nav class="card toc">
+  <strong>Inhalt</strong>
+  <ol>
+    <li><a href="#ueberblick">Überblick</a></li>
+    <li><a href="#anmelden">Anmelden und Konto</a></li>
+    {#if inject:ctx.admin}
+    <li><a href="#veranstaltungen">Veranstaltungen</a></li>
+    <li><a href="#teilnehmer">Teilnehmer erfassen</a></li>
+    <li><a href="#verschicken">QR-Codes verschicken</a></li>
+    <li><a href="#scanner-einrichten">Scanner einrichten</a></li>
+    {/if}
+    <li><a href="#scannen">Scannen</a></li>
+    {#if inject:ctx.admin}
+    <li><a href="#veranstaltungstag">Am Veranstaltungstag</a></li>
+    {/if}
+    <li><a href="#fragen">Häufige Fragen</a></li>
+  </ol>
+</nav>
+
+<section id="ueberblick">
+<h2>Überblick</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Rolle</th><th>Wer</th><th>Darf</th></tr></thead>
+  <tbody>
+  <tr><td><strong>Admin</strong></td><td>Veranstalter, Büro</td><td>Alles: Veranstaltungen, Teilnehmer, QR-Codes, Benutzer verwalten und scannen</td></tr>
+  <tr><td><strong>Scanner</strong></td><td>Helfer am Einlass, z. B. Reiseleitung oder Busfahrer</td><td>Nur scannen, und nur bei Veranstaltungen, deren Scan-Link er bekommen hat</td></tr>
+  </tbody>
+</table>
+</div>
+<ol>
+  <li><strong>Vorbereiten</strong> (Admin, am PC): Veranstaltung anlegen, Teilnehmer eintragen oder aus Excel importieren.</li>
+  <li><strong>Verschicken</strong> (Admin, am PC): Pro Teilnehmer den QR-Code kopieren und in Outlook in eine E-Mail an ihn einfügen.
+    Den Scan-Link an die Scanner schicken, z. B. per WhatsApp.</li>
+  <li><strong>Scannen</strong> (Scanner, am Handy): Scan-Link öffnen, anmelden, QR-Codes der Teilnehmer scannen.</li>
+</ol>
+<p>Doorman läuft im Browser. Eine Installation ist nicht nötig, weder am PC noch am Handy.</p>
+</section>
+
+<section id="anmelden">
+<h2>Anmelden und Konto</h2>
+<ul>
+  <li><strong>Anmelden:</strong> Doorman-Adresse im Browser öffnen, Benutzername und Passwort eingeben, die der Admin vergeben hat.</li>
+  <li><strong>Angemeldet bleiben:</strong> Die Anmeldung hält 12 Stunden ohne Aktivität. Am Veranstaltungstag genügt normalerweise eine Anmeldung.</li>
+  <li><strong>Passwort ändern:</strong> Oben rechts auf den eigenen Namen, altes und zweimal das neue Passwort eingeben (mindestens 8 Zeichen).</li>
+  <li><strong>Abmelden:</strong> Oben rechts auf „Abmelden“, auf der Scanner-Seite unten.</li>
+  <li><strong>Hell oder dunkel:</strong> Doorman folgt automatisch der Einstellung von Handy oder PC. Mit Sonne bzw. Mond oben rechts
+    lässt sich das auf diesem Gerät umstellen. Wählt man wieder die Variante des Systems, folgt Doorman wieder automatisch.
+    Die Scanner-Seite ist immer dunkel, damit Kamerabild und Farbmeldungen gut zu sehen sind.</li>
+  <li><strong>Hilfe:</strong> Der Knopf <span class="help-btn inline">?</span> oben öffnet diese Seite.</li>
+</ul>
+</section>
+
+{#if inject:ctx.admin}
+<section id="veranstaltungen">
+<h2>Veranstaltungen</h2>
+<p>Eine Veranstaltung hat Teilnehmer und einen oder mehrere Check-in-Punkte. An jedem Punkt kann jeder Teilnehmer genau einmal eingecheckt werden.</p>
+<h3>Anlegen</h3>
+<ol>
+  <li>Oben auf „Veranstaltungen“, dann „+ Neue Veranstaltung“.</li>
+  <li>Name eingeben, z. B. „Busreise Gardasee 2027“. Datum und Beschreibung sind freiwillig.</li>
+  <li>Check-in-Punkte eintragen, einen pro Zeile. Vorgegeben ist „Einlass“.</li>
+  <li>Auf „Anlegen“ klicken.</li>
+</ol>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Anlass</th><th>Check-in-Punkte</th></tr></thead>
+  <tbody>
+  <tr><td>Konzert, Feier, Seminar</td><td>Einlass</td></tr>
+  <tr><td>Busreise mit Rückfahrt</td><td>Hinfahrt, Rückfahrt (Knopf „Vorlage: Hin- &amp; Rückfahrt“)</td></tr>
+  <tr><td>Mehrtägige Veranstaltung</td><td>z. B. Tag 1, Tag 2, Tag 3</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Der Teilnehmer bekommt trotzdem nur <strong>einen</strong> QR-Code. Bei der Rückfahrt wird derselbe Code noch einmal gescannt, am Punkt „Rückfahrt“.</p>
+<h3>Bearbeiten und löschen</h3>
+<p>Auf der Veranstaltungsseite oben auf „Bearbeiten“: Name, Datum und Beschreibung ändern, Check-in-Punkte umbenennen, hinzufügen oder löschen.
+  Mindestens ein Punkt bleibt immer bestehen.</p>
+<p>Ganz unten steht „Veranstaltung löschen“. Das löscht die Veranstaltung mit <strong>allen Teilnehmern und Check-ins endgültig</strong>,
+  z. B. nach der Reise, um keine Personendaten länger als nötig aufzubewahren.</p>
+</section>
+
+<section id="teilnehmer">
+<h2>Teilnehmer erfassen</h2>
+<h3>Einzeln hinzufügen</h3>
+<p>Auf der Veranstaltungsseite „+ Teilnehmer hinzufügen“ aufklappen, Vorname, Nachname, E-Mail und Bemerkung eingeben, „Hinzufügen“ klicken.
+  Nötig ist nur ein Vor- oder Nachname. Die Bemerkung, z. B. „Sitz 12“, sieht der Scanner beim grünen Ergebnis.
+  Ändern oder löschen: beim Teilnehmer auf „Bearbeiten“.</p>
+<h3>Aus Excel importieren</h3>
+<ol>
+  <li>In Excel eine Tabelle anlegen, erste Zeile mit den Spaltennamen:
+    <pre>Vorname;Nachname;E-Mail;Bemerkung
+Max;Mustermann;max@example.com;Sitz 12
+Erika;Musterfrau;erika@example.com;</pre></li>
+  <li>In Excel <em>Datei → Speichern unter → CSV (Trennzeichen-getrennt)</em>.</li>
+  <li>In Doorman auf der Veranstaltungsseite „CSV-Import“, Datei auswählen, „Vorschau anzeigen“.</li>
+  <li>Vorschau prüfen: „neu“ wird importiert, alles andere wird mit Grund übersprungen.</li>
+  <li>Auf „… Teilnehmer importieren“ klicken.</li>
+</ol>
+<ul>
+  <li>Die Reihenfolge der Spalten ist egal, solange die Kopfzeile stimmt. Auch „Name“, „Mail“ oder „Notiz“ werden erkannt.
+    Ohne Kopfzeile gilt Vorname, Nachname, E-Mail, Bemerkung.</li>
+  <li>Umlaute funktionieren, egal wie Excel speichert.</li>
+  <li><strong>Dubletten</strong> werden übersprungen (gleiche E-Mail, ohne E-Mail gleicher Name). Eine ergänzte Liste kann also einfach noch einmal importiert werden.</li>
+</ul>
+</section>
+
+<section id="verschicken">
+<h2>QR-Codes verschicken</h2>
+<p>Doorman verschickt keine E-Mails selbst. Der QR-Code wird pro Teilnehmer kopiert und in eine normale Outlook-E-Mail eingefügt.</p>
+<ol>
+  <li>In Outlook eine neue E-Mail an den Teilnehmer beginnen.</li>
+  <li>In Doorman beim Teilnehmer auf <strong>„QR kopieren“</strong>. Der Knopf zeigt kurz „✓ Kopiert“.</li>
+  <li>In Outlook einfügen: Strg+V (Windows) bzw. ⌘V (Mac), dann senden.</li>
+</ol>
+<ul>
+  <li>Ein Klick auf die <strong>E-Mail-Adresse</strong> in der Liste kopiert sie fürs An-Feld.</li>
+  <li>Nach „QR kopieren“ ist das Häkchen <strong>„Versendet“</strong> automatisch gesetzt. Es lässt sich auch von Hand setzen oder entfernen.</li>
+  <li>Der Filter <strong>„QR noch nicht versendet“</strong> zeigt nur die, die noch fehlen.</li>
+  <li>Der Pfeil ↓ lädt den QR-Code als Bild herunter, z. B. zum Ausdrucken.</li>
+</ul>
+<h3>Neuer QR-Code für einen Teilnehmer</h3>
+<p>Wurde ein Code weitergegeben oder an die falsche Adresse geschickt: beim Teilnehmer „Bearbeiten“ → „Neuen QR-Code erzeugen“.
+  Der alte Code ist sofort ungültig. Den neuen Code wieder verschicken.</p>
+</section>
+
+<section id="scanner-einrichten">
+<h2>Scanner einrichten</h2>
+<p>Ein Scanner braucht einen eigenen Benutzer und den Scan-Link der Veranstaltung.</p>
+<h3>Benutzer anlegen</h3>
+<ol>
+  <li>Oben auf „Benutzer“.</li>
+  <li>Benutzername und Passwort (mindestens 8 Zeichen) eingeben, Rolle <strong>Scanner</strong> wählen, „Anlegen“.</li>
+  <li>Dem Helfer Benutzername und Passwort mitteilen.</li>
+</ol>
+<h3>Scan-Link teilen</h3>
+<p>Jede Veranstaltung hat einen eigenen Scan-Link. Auf der Veranstaltungsseite <strong>„Scan-Link für Scanner teilen“</strong> aufklappen:</p>
+<ul>
+  <li><strong>Link kopieren</strong>, um ihn in eine Nachricht oder E-Mail einzufügen.</li>
+  <li><strong>WhatsApp</strong> öffnet WhatsApp mit fertigem Text, nur noch den Empfänger wählen.</li>
+  <li><strong>Teilen …</strong> öffnet das Teilen-Menü des Handys (nur auf dem Handy sichtbar).</li>
+  <li><strong>QR-Code</strong>: Der Helfer scannt ihn mit der normalen Handykamera, praktisch bei der Einweisung vor Ort.</li>
+</ul>
+<p>Ist der Link an die Falschen gegangen: <strong>„Link erneuern“</strong>. Der alte Link funktioniert sofort nicht mehr. Scannen kann ohnehin nur, wer sich anmeldet.</p>
+</section>
+{/if}
+
+<section id="scannen">
+<h2>Scannen</h2>
+<ol>
+  <li>Den <strong>Scan-Link</strong> öffnen, den du vom Veranstalter bekommen hast (z. B. in WhatsApp antippen).</li>
+  <li>Mit Benutzername und Passwort <strong>anmelden</strong>. Danach landest du automatisch auf der Scan-Seite.</li>
+  <li>Bei mehreren Check-in-Punkten den richtigen wählen, z. B. <strong>Hinfahrt</strong> oder <strong>Rückfahrt</strong>.</li>
+  <li>Auf <strong>„Kamera starten“</strong> tippen und den Kamerazugriff erlauben.</li>
+  <li>Den QR-Code des Teilnehmers ins Kamerabild halten. Das Ergebnis erscheint sofort bildschirmfüllend.</li>
+</ol>
+<div class="result-legend">
+  <div class="legend ok"><strong>✓ Gültig</strong> + Name<span>Teilnehmer ist eingecheckt. Einlassen. Eine Bemerkung (z. B. Sitzplatz) steht darunter.</span></div>
+  <div class="legend warn"><strong>! Bereits gescannt</strong> + Uhrzeit<span>Code wurde an diesem Punkt schon verwendet. Nachfragen, evtl. weitergegeben.</span></div>
+  <div class="legend err"><strong>✕ QR-Code nicht gefunden</strong><span>Unbekannter oder ersetzter Code. Nicht einlassen, an den Veranstalter verweisen.</span></div>
+  <div class="legend err"><strong>✕ Falsche Veranstaltung</strong><span>Code einer anderen Veranstaltung, deren Name wird angezeigt. Nicht einlassen.</span></div>
+</div>
+<p>Nach 2–3 Sekunden geht es automatisch weiter, Antippen geht schneller. Oben rechts steht, wie viele schon eingecheckt sind (z. B. 42/100), darunter die letzten Scans.</p>
+<p><strong>Ohne Kamera:</strong> Unter dem Kamerabild kann der Code auch abgetippt werden. Den 26-stelligen Code sieht der Admin beim Teilnehmer unter „Bearbeiten“.</p>
+<p><strong>Als App auf den Home-Bildschirm:</strong> iPhone: in Safari <em>Teilen → Zum Home-Bildschirm</em>. Android: im Chrome-Menü
+  <em>Zum Startbildschirm hinzufügen</em>. Das Symbol öffnet danach direkt die Scan-Seite dieser Veranstaltung.</p>
+</section>
+
+{#if inject:ctx.admin}
+<section id="veranstaltungstag">
+<h2>Am Veranstaltungstag</h2>
+<ul>
+  <li><strong>Übersicht:</strong> Oben auf der Veranstaltungsseite steht pro Check-in-Punkt eine Karte, z. B. „Hinfahrt 42 / 100“. Ein Klick öffnet den Scanner.
+    Neu laden aktualisiert die Zahlen.</li>
+  <li><strong>Wer fehlt noch?</strong> Im Filter „Fehlt bei: Hinfahrt“ wählen.</li>
+  <li><strong>Manuell einchecken:</strong> In der Spalte des Check-in-Punkts auf „–“ klicken und bestätigen, z. B. wenn jemand sein Handy vergessen hat.</li>
+  <li><strong>Check-in zurücknehmen:</strong> Auf „✓ 08:14“ klicken und bestätigen.</li>
+  <li><strong>Export:</strong> „Export“ lädt eine Excel-taugliche Liste mit allen Check-in-Zeiten herunter.</li>
+</ul>
+</section>
+{/if}
+
+<section id="fragen">
+<h2>Häufige Fragen</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Problem</th><th>Lösung</th></tr></thead>
+  <tbody>
+  <tr><td>Kamera startet nicht</td><td>Kamerazugriff erlauben. iPhone: <em>Einstellungen → Safari → Kamera → Erlauben</em>, Seite neu laden.
+    Android: auf das Schloss in der Adresszeile tippen, Kamera erlauben.</td></tr>
+  <tr><td>„Bitte neu anmelden“ beim Scannen</td><td>Die Anmeldung ist abgelaufen. Auf die Meldung tippen, anmelden, weiterscannen.</td></tr>
+  <tr><td>„Verbindungsfehler“</td><td>Kein Internet. Doorman braucht beim Scannen eine Verbindung. WLAN/Mobilfunk prüfen, erneut scannen.</td></tr>
+  <tr><td>QR-Code wird nicht erkannt</td><td>Display heller stellen, Handy ruhig halten, 15–30 cm Abstand. Notfalls Code abtippen oder manuell einchecken lassen.</td></tr>
+  <tr><td>„QR-Code nicht gefunden“, obwohl angemeldet</td><td>Vermutlich ein alter Code, nachdem ein neuer erzeugt wurde. Teilnehmer in der Liste manuell einchecken.</td></tr>
+  <tr><td>„Falsche Veranstaltung“</td><td>Der Code gehört zu einer anderen Reise. Nach der richtigen E-Mail fragen.</td></tr>
+  <tr><td>Scan-Link zeigt „Nicht gefunden“</td><td>Der Link wurde erneuert. Beim Veranstalter den aktuellen Link anfragen.</td></tr>
+  <tr><td>Scanner sieht keine Veranstaltungen</td><td>Richtig so: Scanner kommen nur über den Scan-Link an eine Veranstaltung.</td></tr>
+  <tr><td>Passwort vergessen</td><td>Ein Admin setzt unter „Benutzer“ ein neues Passwort.</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="muted small"><strong>Datenschutz:</strong> Doorman speichert Namen, E-Mail-Adressen, Bemerkungen und Check-in-Zeiten.
+  Bitte Veranstaltungen nach dem Ende löschen, dabei werden alle Teilnehmerdaten mit entfernt.</p>
+</section>
+</div>
+{/include}

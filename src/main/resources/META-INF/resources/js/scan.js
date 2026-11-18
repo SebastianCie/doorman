@@ -3,6 +3,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 
 const root = document.getElementById('scanner');
 const checkpointId = Number(root.dataset.checkpointId);
+const eventCode = root.dataset.eventCode;
 const video = document.getElementById('video');
 const startOverlay = document.getElementById('start');
 const startBtn = document.getElementById('start-btn');
@@ -90,7 +91,7 @@ function hide() {
 
 resultEl.addEventListener('click', () => {
   if (document.getElementById('result-title').textContent === TEXT.SESSION.title) {
-    location.href = '/login';
+    location.reload(); // führt zum Login und danach zurück auf diese Seite
     return;
   }
   clearTimeout(hideTimer);
@@ -110,7 +111,7 @@ async function check(code) {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ token: code, checkpointId }),
+      body: JSON.stringify({ token: code, eventCode, checkpointId }),
     });
     const type = r.headers.get('content-type') || '';
     if (r.status === 401 || r.status === 403 || r.redirected || !type.includes('json')) {

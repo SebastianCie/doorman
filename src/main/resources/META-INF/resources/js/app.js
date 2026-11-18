@@ -88,6 +88,52 @@
     });
   });
 
+  // Hell/Dunkel: ohne eigene Wahl gilt die Systemeinstellung. Wählt man die Variante, die das System
+  // ohnehin hat, wird die eigene Wahl gelöscht und Doorman folgt wieder dem System.
+  var KEY = 'doorman-theme';
+  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function systemTheme() { return media && media.matches ? 'dark' : 'light'; }
+  function currentTheme() { return document.documentElement.dataset.theme || systemTheme(); }
+  function showTheme() {
+    var cur = currentTheme();
+    document.querySelectorAll('[data-set-theme]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-set-theme') === cur));
+    });
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
+      m.setAttribute('content', cur === 'dark' ? '#111827' : '#ffffff');
+      m.removeAttribute('media');
+    });
+  }
+  document.querySelectorAll('[data-set-theme]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var wanted = b.getAttribute('data-set-theme');
+      try {
+        if (wanted === systemTheme()) {
+          delete document.documentElement.dataset.theme;
+          localStorage.removeItem(KEY);
+        } else {
+          document.documentElement.dataset.theme = wanted;
+          localStorage.setItem(KEY, wanted);
+        }
+      } catch (e) {
+        document.documentElement.dataset.theme = wanted;
+      }
+      showTheme();
+    });
+  });
+  if (media && media.addEventListener) media.addEventListener('change', showTheme);
+  showTheme();
+
+  // "Teilen …" über das Teilen-Menü des Handys (WhatsApp, Signal, SMS …), falls verfügbar
+  document.querySelectorAll('[data-share-url]').forEach(function (btn) {
+    if (!navigator.share) return;
+    btn.hidden = false;
+    btn.addEventListener('click', function () {
+      navigator.share({ title: btn.getAttribute('data-share-title'), url: btn.getAttribute('data-share-url') })
+        .catch(function () {});
+    });
+  });
+
   // Teilnehmerliste filtern
   var filter = document.getElementById('filter');
   var status = document.getElementById('filter-status');

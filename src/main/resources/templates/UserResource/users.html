@@ -11,7 +11,7 @@
     <td>
       <form method="post" action="/users/{u.id}/role" class="inline-form">
         <select name="role" onchange="this.form.submit()">
-          <option value="user" {#if !u.admin}selected{/if}>Benutzer</option>
+          <option value="scanner" {#if !u.admin}selected{/if}>Scanner</option>
           <option value="admin" {#if u.admin}selected{/if}>Admin</option>
         </select>
       </form>
@@ -40,11 +40,11 @@
   <label>Passwort <input name="password" type="password" minlength="8" required autocomplete="new-password"></label>
   <label>Rolle
     <select name="role">
-      <option value="user">Benutzer</option>
+      <option value="scanner">Scanner</option>
       <option value="admin">Admin</option>
     </select>
   </label>
   <button class="btn primary">Anlegen</button>
 </form>
-<p class="muted small">Benutzer können Veranstaltungen verwalten und scannen. Admins können zusätzlich Benutzer verwalten.</p>
+<p class="muted small"><strong>Admins</strong> dürfen alles. <strong>Scanner</strong> dürfen nur scannen, und zwar über den Scan-Link einer Veranstaltung.</p>
 {/include}

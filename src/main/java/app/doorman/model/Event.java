@@ -26,6 +26,14 @@ public class Event extends PanacheEntityBase {
 
     public String description;
 
+    /** Geheimer Teil des Scan-Links /s/{scanCode}, den Scanner bekommen. */
+    @Column(name = "scan_code")
+    public String scanCode;
+
+    public static Event findByScanCode(String code) {
+        return code == null ? null : find("scanCode", code.toUpperCase()).firstResult();
+    }
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 }

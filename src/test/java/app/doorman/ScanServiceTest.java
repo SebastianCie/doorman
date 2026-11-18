@@ -9,10 +9,12 @@ import app.doorman.service.TokenGenerator;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 class ScanServiceTest {
@@ -20,19 +22,21 @@ class ScanServiceTest {
     @Inject
     ScanService scanService;
 
-    record Fixture(Long hin, Long rueck, Long otherCp, String token) {
+    record Fixture(Long hin, Long rueck, Long otherCp, String token, String code, String otherCode) {
     }
 
     @Transactional
     Fixture setup() {
         Event bus = new Event();
         bus.name = "Busreise";
+        bus.scanCode = TokenGenerator.newToken();
         bus.persist();
         Checkpoint hin = cp(bus, "Hinfahrt", 0);
         Checkpoint rueck = cp(bus, "Rückfahrt", 1);
 
         Event other = new Event();
         other.name = "Andere Reise";
+        other.scanCode = TokenGenerator.newToken();
         other.persist();
         Checkpoint otherCp = cp(other, "Einlass", 0);
 
@@ -42,7 +46,7 @@ class ScanServiceTest {
         p.lastName = "Mustermann";
         p.token = TokenGenerator.newToken();
         p.persist();
-        return new Fixture(hin.id, rueck.id, otherCp.id, p.token);
+        return new Fixture(hin.id, rueck.id, otherCp.id, p.token, bus.scanCode, other.scanCode);
     }
 
     private static Checkpoint cp(Event e, String name, int order) {
@@ -58,25 +62,29 @@ class ScanServiceTest {
     void scanFlow() {
         Fixture f = setup();
 
-        var first = scanService.scan(f.token(), f.hin(), "tester");
+        var first = scanService.scan(f.token(), f.code(), f.hin(), "tester");
         assertEquals(Status.OK, first.status());
         assertEquals("Max Mustermann", first.name());
         assertEquals(1, first.checkedIn());
         assertEquals(1, first.total());
 
-        var again = scanService.scan(f.token().toLowerCase(), f.hin(), "tester");
+        var again = scanService.scan(f.token().toLowerCase(), f.code(), f.hin(), "tester");
         assertEquals(Status.ALREADY, again.status());
         assertNotNull(again.time());
 
         // Rückfahrt ist ein eigener Check-in-Punkt
-        assertEquals(Status.OK, scanService.scan(f.token(), f.rueck(), "tester").status());
+        assertEquals(Status.OK, scanService.scan(f.token(), f.code(), f.rueck(), "tester").status());
 
-        assertEquals(Status.NOT_FOUND, scanService.scan("GIBTESNICHT", f.hin(), "tester").status());
-        assertEquals(Status.NOT_FOUND, scanService.scan("", f.hin(), "tester").status());
+        assertEquals(Status.NOT_FOUND, scanService.scan("GIBTESNICHT", f.code(), f.hin(), "tester").status());
+        assertEquals(Status.NOT_FOUND, scanService.scan("", f.code(), f.hin(), "tester").status());
 
-        var wrong = scanService.scan(f.token(), f.otherCp(), "tester");
+        var wrong = scanService.scan(f.token(), f.otherCode(), f.otherCp(), "tester");
         assertEquals(Status.WRONG_EVENT, wrong.status());
         assertEquals("Busreise", wrong.otherEvent());
+
+        // Checkpoint-ID einer anderen Veranstaltung mit falschem Scan-Link-Code → abgelehnt
+        assertThrows(NotFoundException.class, () -> scanService.scan(f.token(), f.code(), f.otherCp(), "tester"));
+        assertThrows(NotFoundException.class, () -> scanService.scan(f.token(), null, f.hin(), "tester"));
     }
 
     @Test

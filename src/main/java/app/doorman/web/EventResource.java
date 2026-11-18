@@ -4,8 +4,15 @@ import app.doorman.model.Checkin;
 import app.doorman.model.Checkpoint;
 import app.doorman.model.Event;
 import app.doorman.model.Participant;
+import app.doorman.service.QrCodeService;
+import app.doorman.service.TokenGenerator;
 import io.quarkus.panache.common.Sort;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
+import app.doorman.model.AppUser;
 import io.quarkus.qute.CheckedTemplate;
+import jakarta.annotation.security.RolesAllowed;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.GET;
@@ -22,6 +29,7 @@ import org.jboss.resteasy.reactive.RestForm;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -34,7 +42,11 @@ import java.util.stream.Collectors;
 
 @Path("/events")
 @Produces(MediaType.TEXT_HTML)
+@RolesAllowed(AppUser.ROLE_ADMIN)
 public class EventResource {
+
+    @Inject
+    QrCodeService qr;
 
     public record Summary(Event event, long participants, String checkpointNames) {
     }
@@ -58,7 +70,7 @@ public class EventResource {
         static native TemplateInstance create();
 
         static native TemplateInstance detail(Event event, List<Checkpoint> checkpoints, List<Row> rows,
-                                              List<Stat> stats);
+                                              List<Stat> stats, String scanUrl, String whatsappUrl);
 
         static native TemplateInstance edit(Event event, List<Checkpoint> checkpoints);
     }
@@ -93,6 +105,7 @@ public class EventResource {
         e.name = name.trim();
         e.eventDate = parseDate(date);
         e.description = blankToNull(description);
+        e.scanCode = TokenGenerator.newToken();
         e.persist();
 
         List<String> names = checkpoints == null ? List.of() : checkpoints.lines()
@@ -113,7 +126,7 @@ public class EventResource {
 
     @GET
     @Path("{id}")
-    public TemplateInstance detail(@PathParam("id") Long id) {
+    public TemplateInstance detail(@PathParam("id") Long id, @Context UriInfo uriInfo) {
         Event event = load(id);
         List<Checkpoint> cps = Checkpoint.forEvent(id);
         List<Participant> participants = Participant.forEvent(id);
@@ -133,7 +146,33 @@ public class EventResource {
         }
         List<Stat> stats = cps.stream()
                 .map(cp -> new Stat(cp, perCheckpoint.getOrDefault(cp.id, 0L), participants.size())).toList();
-        return Templates.detail(event, cps, rows, stats);
+        String scanUrl = scanUrl(event, uriInfo);
+        String whatsappUrl = "https://wa.me/?text=" + URLEncoder.encode(
+                "Scanner-Link für „" + event.name + "“: " + scanUrl, StandardCharsets.UTF_8).replace("+", "%20");
+        return Templates.detail(event, cps, rows, stats, scanUrl, whatsappUrl);
+    }
+
+    /** Öffentliche Adresse des Scan-Links, z. B. https://doorman.example.com/s/K7MQ2XP9… */
+    static String scanUrl(Event event, UriInfo uriInfo) {
+        return uriInfo.getBaseUriBuilder().path("s").path(event.scanCode).build().toString();
+    }
+
+    /** QR-Code mit dem Scan-Link: Scanner öffnen ihn einfach mit der Handykamera. */
+    @GET
+    @Path("{id}/scan-link.png")
+    @Produces("image/png")
+    public Response scanLinkQr(@PathParam("id") Long id, @Context UriInfo uriInfo) {
+        return Response.ok(qr.png(scanUrl(load(id), uriInfo), 480))
+                .header("Cache-Control", "private, no-store").build();
+    }
+
+    /** Neuer Scan-Link; der bisherige funktioniert danach nicht mehr. */
+    @POST
+    @Path("{id}/scan-code")
+    @Transactional
+    public Response newScanCode(@PathParam("id") Long id) {
+        load(id).scanCode = TokenGenerator.newToken();
+        return Redirects.ok("/events/" + id, "Neuer Scan-Link erzeugt. Der alte Link funktioniert nicht mehr.");
     }
 
     @GET

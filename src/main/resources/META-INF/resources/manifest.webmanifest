@@ -1,7 +1,7 @@
 {
   "name": "Doorman – Zutrittskontrolle",
   "short_name": "Doorman",
-  "start_url": "/scan",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",

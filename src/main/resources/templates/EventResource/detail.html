@@ -10,12 +10,13 @@
     <a class="btn" href="/events/{event.id}/edit">Bearbeiten</a>
     <a class="btn" href="/events/{event.id}/import">CSV-Import</a>
     <a class="btn" href="/events/{event.id}/export.csv">Export</a>
+    <a class="btn" href="/help#veranstaltungstag" title="Hilfe zu dieser Seite">?</a>
   </div>
 </div>
 
 <div class="stats">
   {#for s in stats}
-  <a class="card stat" href="/scan/{s.checkpoint.id}" title="Scanner für „{s.checkpoint.name}“ öffnen">
+  <a class="card stat" href="/s/{event.scanCode}/{s.checkpoint.id}" title="Scanner für „{s.checkpoint.name}“ öffnen">
     <div class="stat-label">{s.checkpoint.name}</div>
     <div class="stat-value">{s.count} <span>/ {s.total}</span></div>
     <div class="bar"><div style="width: {s.percent}%"></div></div>
@@ -23,6 +24,32 @@
   </a>
   {/for}
 </div>
+
+<details class="card scan-link">
+  <summary>📱 Scan-Link für Scanner teilen</summary>
+  <div class="scan-link-body">
+    <div class="stack grow">
+      <p class="muted small">Diesen Link an die Scanner schicken, z. B. per WhatsApp. Sie öffnen ihn auf dem Handy,
+        melden sich mit ihrem Scanner-Benutzer an und können sofort scannen. Mit „Zum Home-Bildschirm“ wird daraus eine App.</p>
+      <input type="text" readonly value="{scanUrl}" class="scan-url" onclick="this.select()">
+      <div class="row-buttons">
+        <button type="button" class="btn primary" data-copy-text="{scanUrl}">Link kopieren</button>
+        <a class="btn whatsapp" target="_blank" rel="noopener"
+           href="{whatsappUrl}">WhatsApp</a>
+        <button type="button" class="btn" data-share-url="{scanUrl}" data-share-title="Doorman – {event.name}" hidden>Teilen …</button>
+      </div>
+      <form method="post" action="/events/{event.id}/scan-code"
+            data-confirm="Neuen Scan-Link erzeugen? Der bisherige Link funktioniert dann nicht mehr und muss neu verschickt werden.">
+        <button class="link-btn small">Link erneuern (alter Link wird ungültig)</button>
+      </form>
+    </div>
+    <div class="center">
+      <img class="link-qr" src="/events/{event.id}/scan-link.png" alt="QR-Code mit dem Scan-Link">
+      <div class="muted small">Mit der Handykamera scannen</div>
+      <button type="button" class="btn small" data-copy-qr="/events/{event.id}/scan-link.png">QR kopieren</button>
+    </div>
+  </div>
+</details>
 
 <details class="card add-participant" {#if rows.isEmpty}open{/if}>
   <summary>+ Teilnehmer hinzufügen</summary>

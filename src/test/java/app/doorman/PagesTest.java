@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
 /** Klickt sich einmal durch alle Seiten: Login, Veranstaltung, Teilnehmer, Import, Scan, Benutzer. */
 @QuarkusTest
@@ -20,15 +21,25 @@ class PagesTest {
     void unauthenticatedRedirectsToLogin() {
         given().redirects().follow(false).when().get("/events")
                 .then().statusCode(302).header("Location", containsString("/login"));
-        given().when().get("/login").then().statusCode(200).body(containsString("Anmelden"));
+        given().when().get("/login").then().statusCode(200).body(containsString("Anmelden"))
+                .body(containsString("href=\"/help\""));
+        // Hilfe ohne Anmeldung: nur die Kapitel für Scanner
+        given().when().get("/help").then().statusCode(200)
+                .body(containsString("id=\"scannen\"")).body(containsString("id=\"fragen\""))
+                .body(not(containsString("id=\"teilnehmer\"")));
+    }
+
+    static CookieFilter login(String user, String password) {
+        CookieFilter cookies = new CookieFilter();
+        RestAssured.given().filter(cookies).redirects().follow(false)
+                .formParam("j_username", user).formParam("j_password", password)
+                .post("/j_security_check").then().statusCode(302);
+        return cookies;
     }
 
     @Test
     void fullFlow() {
-        CookieFilter cookies = new CookieFilter();
-        RestAssured.given().filter(cookies).redirects().follow(false)
-                .formParam("j_username", "admin").formParam("j_password", "admin")
-                .post("/j_security_check").then().statusCode(302);
+        CookieFilter cookies = login("admin", "admin");
 
         given().filter(cookies).get("/events").then().statusCode(200).body(containsString("Veranstaltungen"));
         given().filter(cookies).get("/events/new").then().statusCode(200);
@@ -57,7 +68,7 @@ class PagesTest {
                 .body(containsString("Musterfrau")).body(containsString("Mustermann"))
                 .body(containsString("Rückfahrt")).extract().asString();
 
-        String qrPath = detail.replaceAll("(?s).*?data-copy-qr=\"([^\"]+)\".*", "$1");
+        String qrPath = detail.replaceAll("(?s).*?data-copy-qr=\"([^\"]+/participants/[^\"]+)\".*", "$1");
         given().filter(cookies).get(qrPath).then().statusCode(200).contentType("image/png");
         String participantPath = qrPath.replace("/qr.png", "");
         given().filter(cookies).get(participantPath + "/edit").then().statusCode(200);
@@ -71,15 +82,50 @@ class PagesTest {
 
         String select = given().filter(cookies).get("/scan").then().statusCode(200)
                 .body(containsString("Testreise")).extract().asString();
-        String scanPath = select.replaceAll("(?s).*?href=\"(/scan/\\d+)\".*", "$1");
+        String scanPath = select.replaceAll("(?s).*?href=\"(/s/[A-Z0-9]+/\\d+)\".*", "$1");
         given().filter(cookies).get(scanPath).then().statusCode(200).body(containsString("Kamera starten"));
-
-        long cpId = Long.parseLong(scanPath.substring("/scan/".length()));
+        String code = scanPath.split("/")[2];
+        long cpId = Long.parseLong(scanPath.split("/")[3]);
         given().filter(cookies).contentType(ContentType.JSON)
-                .body("{\"token\":\"UNBEKANNT\",\"checkpointId\":" + cpId + "}")
+                .body("{\"token\":\"UNBEKANNT\",\"eventCode\":\"" + code + "\",\"checkpointId\":" + cpId + "}")
                 .post("/api/scan").then().statusCode(200).body("status", equalTo("NOT_FOUND"));
 
+        // Scan-Link wird auf der Veranstaltungsseite angezeigt, inkl. QR
+        given().filter(cookies).get(eventPath).then().body(containsString("/s/" + code))
+                .body(containsString("https://wa.me/?text="));
+        given().filter(cookies).get(eventPath + "/scan-link.png").then().statusCode(200).contentType("image/png");
+        given().filter(cookies).get("/s/" + code).then().statusCode(200).body(containsString("Check-in-Punkt wählen"));
+        given().filter(cookies).get("/s/" + code + "/manifest.webmanifest").then().statusCode(200)
+                .body("start_url", equalTo("/s/" + code));
+
+        // Scanner-Benutzer anlegen: darf nur scannen
+        given().filter(cookies).redirects().follow(false)
+                .formParam("username", "scanner1").formParam("password", "geheim123").formParam("role", "scanner")
+                .post("/users").then().statusCode(303);
+        CookieFilter scanner = login("scanner1", "geheim123");
+        given().filter(scanner).get("/").then().statusCode(200).body(containsString("Scan-Link"));
+        given().filter(scanner).get(scanPath).then().statusCode(200).body(containsString("Kamera starten"));
+        given().filter(scanner).contentType(ContentType.JSON)
+                .body("{\"token\":\"UNBEKANNT\",\"eventCode\":\"" + code + "\",\"checkpointId\":" + cpId + "}")
+                .post("/api/scan").then().statusCode(200).body("status", equalTo("NOT_FOUND"));
+        given().filter(scanner).get("/account").then().statusCode(200);
+        given().filter(scanner).get("/help").then().statusCode(200)
+                .body(containsString("id=\"scannen\"")).body(not(containsString("id=\"teilnehmer\"")));
+        for (String forbidden : new String[]{"/events", eventPath, eventPath + "/import", "/scan", "/users", qrPath}) {
+            given().filter(scanner).redirects().follow(false).get(forbidden).then().statusCode(403);
+        }
+        given().filter(scanner).redirects().follow(false).formParam("name", "Hack").post("/events")
+                .then().statusCode(403);
+        // Falscher Scan-Link → 404
+        given().filter(scanner).get("/s/FALSCH/" + cpId).then().statusCode(404);
+
+        // Neuer Scan-Link macht den alten ungültig
+        given().filter(cookies).redirects().follow(false).post(eventPath + "/scan-code").then().statusCode(303);
+        given().filter(scanner).get(scanPath).then().statusCode(404);
+
         given().filter(cookies).get("/users").then().statusCode(200).body(containsString("admin"));
+        given().filter(cookies).get("/help").then().statusCode(200)
+                .body(containsString("id=\"teilnehmer\"")).body(containsString("id=\"scanner-einrichten\""));
         given().filter(cookies).get("/account").then().statusCode(200);
     }
 }

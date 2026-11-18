@@ -25,7 +25,7 @@ import java.time.Instant;
 public class AppUser extends PanacheEntityBase {
 
     public static final String ROLE_ADMIN = "admin";
-    public static final String ROLE_USER = "user";
+    public static final String ROLE_SCANNER = "scanner";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

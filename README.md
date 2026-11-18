@@ -4,9 +4,11 @@ Eine Anwendung, ein Container:
 
 - **Verwaltung** (`/events`, Desktop): Veranstaltungen mit Check-in-Punkten (z. B. Hin- und Rückfahrt),
   Teilnehmer manuell oder per CSV, QR-Code pro Teilnehmer in die Zwischenablage kopieren und in Outlook einfügen.
-- **Scanner** (`/scan`, Smartphone): Kamera scannt den QR-Code und zeigt dann eine dieser Meldungen an:
+- **Scanner** (Smartphone): Jede Veranstaltung hat einen eigenen **Scan-Link** (`/s/<code>`). Der Admin kopiert ihn
+  auf der Veranstaltungsseite oder schickt ihn per WhatsApp bzw. als QR-Code an die Scanner. Die öffnen ihn,
+  melden sich an und scannen. Die Kamera liest den QR-Code und zeigt dann eine dieser Meldungen an:
   🟢 Gültig, 🟠 Bereits gescannt (mit Uhrzeit), 🔴 QR-Code nicht gefunden / falsche Veranstaltung.
-  Auf dem iPhone in Safari öffnen, dann *Teilen → Zum Home-Bildschirm* (PWA).
+  Auf dem iPhone in Safari: *Teilen → Zum Home-Bildschirm* legt den Scan-Link als App ab (PWA).
 
 Stack: Java 21, Quarkus, Qute (serverseitiges HTML), Hibernate Panache, Flyway, PostgreSQL,
 ZXing (QR-Erzeugung), [qr-scanner](https://github.com/nimiq/qr-scanner) (Scannen im Browser, MIT).
@@ -70,7 +72,10 @@ Tests: `./mvnw test`
 - Ein Teilnehmer hat **einen** QR-Code. Er kann an jedem Check-in-Punkt der Veranstaltung genau einmal eingecheckt werden.
   Doppelte Scans, auch gleichzeitig von mehreren Geräten, verhindert die Datenbank (`unique` + `insert … on conflict do nothing`).
 - Check-ins lassen sich in der Teilnehmerliste manuell setzen oder zurücknehmen (Klick auf „–“ bzw. „✓ 08:14“).
-- Login: Formular-Login, Benutzer und bcrypt-Passwörter in der DB. Rollen: *Benutzer* (alles außer Benutzerverwaltung) und *Admin*.
+- Login: Formular-Login, Benutzer und bcrypt-Passwörter in der DB. Rollen:
+  - **Admin**: darf alles (Veranstaltungen, Teilnehmer, Benutzer, scannen).
+  - **Scanner**: darf nur scannen, und nur über den Scan-Link einer Veranstaltung. Ohne gültigen Link-Code
+    ist kein Scan möglich. „Link erneuern“ macht einen weitergegebenen Link sofort ungültig.
 - Datenschutz: Beim Löschen einer Veranstaltung werden alle Teilnehmer und Check-ins mitgelöscht.
 
 ## CSV-Format

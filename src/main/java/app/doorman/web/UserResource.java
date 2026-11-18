@@ -55,7 +55,7 @@ public class UserResource {
         }
         AppUser u = new AppUser();
         u.username = username.trim();
-        u.role = AppUser.ROLE_ADMIN.equals(role) ? AppUser.ROLE_ADMIN : AppUser.ROLE_USER;
+        u.role = AppUser.ROLE_ADMIN.equals(role) ? AppUser.ROLE_ADMIN : AppUser.ROLE_SCANNER;
         u.setPassword(password);
         u.persist();
         return Redirects.ok("/users", "Benutzer " + u.username + " angelegt.");
@@ -78,7 +78,7 @@ public class UserResource {
     @Transactional
     public Response changeRole(@PathParam("id") Long id, @RestForm String role) {
         AppUser u = load(id);
-        String newRole = AppUser.ROLE_ADMIN.equals(role) ? AppUser.ROLE_ADMIN : AppUser.ROLE_USER;
+        String newRole = AppUser.ROLE_ADMIN.equals(role) ? AppUser.ROLE_ADMIN : AppUser.ROLE_SCANNER;
         if (u.isAdmin() && !newRole.equals(AppUser.ROLE_ADMIN) && AppUser.count("role", AppUser.ROLE_ADMIN) <= 1) {
             return Redirects.err("/users", "Es muss mindestens einen Admin geben.");
         }

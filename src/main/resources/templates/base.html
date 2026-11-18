@@ -4,11 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{#insert title}Doorman{/} · Doorman</title>
+  <script>
+    // Gewählte Darstellung sofort setzen (vor dem ersten Zeichnen, kein Aufblitzen)
+    try { var t = localStorage.getItem('doorman-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
   <link rel="stylesheet" href="/css/app.css">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-180.png">
-  <meta name="theme-color" content="#1d4ed8">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Doorman">
@@ -16,14 +22,23 @@
 <body>
 {#if inject:ctx.loggedIn}
 <header class="topbar">
-  <a class="brand" href="/events"><img src="/icons/icon-192.png" alt=""> Doorman</a>
+  <a class="brand" href="/"><img src="/icons/icon-192.png" alt=""> Doorman</a>
   <nav>
+    {#if inject:ctx.admin}
     <a href="/events">Veranstaltungen</a>
     <a href="/scan">Scannen</a>
-    {#if inject:ctx.admin}<a href="/users">Benutzer</a>{/if}
+    <a href="/users">Benutzer</a>
+    {/if}
     <a href="/account" title="Konto">{inject:ctx.username}</a>
     <a href="/logout">Abmelden</a>
+    {#include themeToggle /}
+    <a href="/help" class="help-btn" title="Hilfe" aria-label="Hilfe">?</a>
   </nav>
+</header>
+{#else}
+<header class="topbar">
+  <a class="brand" href="/"><img src="/icons/icon-192.png" alt=""> Doorman</a>
+  <nav>{#include themeToggle /}<a href="/help" class="help-btn" title="Hilfe" aria-label="Hilfe">?</a></nav>
 </header>
 {/if}
 <main class="container">

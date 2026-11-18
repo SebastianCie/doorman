@@ -1,26 +1,24 @@
 package app.doorman.web;
 
+import app.doorman.model.AppUser;
 import app.doorman.model.Checkpoint;
 import app.doorman.model.Event;
-import app.doorman.model.Participant;
-import app.doorman.service.ScanService;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
-import jakarta.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.time.LocalDate;
 import java.util.List;
 
-/** Scanner-Oberfläche fürs Smartphone. */
+/** Übersicht aller Veranstaltungen zum Scannen – nur für Admins. Scanner kommen über den Scan-Link. */
 @Path("/scan")
 @Produces(MediaType.TEXT_HTML)
+@RolesAllowed(AppUser.ROLE_ADMIN)
 public class ScanResource {
 
     public record Choice(Event event, List<Checkpoint> checkpoints) {
@@ -29,12 +27,7 @@ public class ScanResource {
     @CheckedTemplate
     static class Templates {
         static native TemplateInstance select(List<Choice> upcoming, List<Choice> past);
-
-        static native TemplateInstance scanner(Event event, Checkpoint checkpoint, long checkedIn, long total);
     }
-
-    @Inject
-    ScanService scanService;
 
     @GET
     public TemplateInstance select() {
@@ -49,16 +42,5 @@ public class ScanResource {
                 .limit(5)
                 .map(e -> new Choice(e, Checkpoint.forEvent(e.id))).toList();
         return Templates.select(upcoming, past);
-    }
-
-    @GET
-    @Path("{cpId}")
-    public TemplateInstance scanner(@PathParam("cpId") Long cpId) {
-        Checkpoint cp = Checkpoint.findById(cpId);
-        if (cp == null) {
-            throw new NotFoundException();
-        }
-        Event event = Event.findById(cp.event.id);
-        return Templates.scanner(event, cp, scanService.checkedInCount(cp.id), Participant.count("event.id", event.id));
     }
 }

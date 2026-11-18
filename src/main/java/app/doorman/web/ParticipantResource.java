@@ -6,7 +6,9 @@ import app.doorman.model.Event;
 import app.doorman.model.Participant;
 import app.doorman.service.QrCodeService;
 import app.doorman.service.TokenGenerator;
+import app.doorman.model.AppUser;
 import io.quarkus.qute.CheckedTemplate;
+import jakarta.annotation.security.RolesAllowed;
 import io.quarkus.qute.TemplateInstance;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 @Path("/events/{eventId}/participants")
 @Produces(MediaType.TEXT_HTML)
+@RolesAllowed(AppUser.ROLE_ADMIN)
 public class ParticipantResource {
 
     @CheckedTemplate

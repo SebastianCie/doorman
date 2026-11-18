@@ -4,7 +4,9 @@ import app.doorman.model.Event;
 import app.doorman.model.Participant;
 import app.doorman.service.CsvImportService;
 import app.doorman.service.TokenGenerator;
+import app.doorman.model.AppUser;
 import io.quarkus.qute.CheckedTemplate;
+import jakarta.annotation.security.RolesAllowed;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Path("/events/{eventId}/import")
 @Produces(MediaType.TEXT_HTML)
+@RolesAllowed(AppUser.ROLE_ADMIN)
 public class ImportResource {
 
     @CheckedTemplate

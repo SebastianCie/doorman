@@ -21,6 +21,8 @@ public class LoginResource {
     @CheckedTemplate
     static class Templates {
         static native TemplateInstance login(boolean error);
+
+        static native TemplateInstance scannerHome();
     }
 
     @Inject
@@ -29,9 +31,14 @@ public class LoginResource {
     @ConfigProperty(name = "quarkus.http.auth.form.cookie-name", defaultValue = "quarkus-credential")
     String cookieName;
 
+    /** Startseite je nach Rolle: Admins → Veranstaltungen, Scanner → Hinweis auf den Scan-Link. */
     @GET
-    public Response root() {
-        return Redirects.to("/events");
+    @Produces(MediaType.TEXT_HTML)
+    public Object root() {
+        if (identity.hasRole("admin")) {
+            return Redirects.to("/events");
+        }
+        return Templates.scannerHome();
     }
 
     @GET
@@ -39,7 +46,7 @@ public class LoginResource {
     @Produces(MediaType.TEXT_HTML)
     public Object login(@QueryParam("error") boolean error) {
         if (!identity.isAnonymous()) {
-            return Redirects.to("/events");
+            return Redirects.to("/");
         }
         return Templates.login(error);
     }

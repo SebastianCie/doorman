@@ -25,9 +25,10 @@ public class ScanService {
      * gleichzeitig denselben Code, gewinnt genau eines.
      */
     @Transactional
-    public ScanResult scan(String rawToken, long checkpointId, String username) {
+    public ScanResult scan(String rawToken, String eventCode, long checkpointId, String username) {
         Checkpoint cp = Checkpoint.findById(checkpointId);
-        if (cp == null) {
+        // Der Scan-Link-Code muss zur Veranstaltung passen, sonst könnte man andere Veranstaltungen durchprobieren
+        if (cp == null || eventCode == null || !cp.event.scanCode.equalsIgnoreCase(eventCode)) {
             throw new NotFoundException();
         }
         Long eventId = cp.event.id;

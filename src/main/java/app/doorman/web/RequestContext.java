@@ -29,6 +29,10 @@ public class RequestContext {
         return identity.hasRole("admin");
     }
 
+    public boolean isScanner() {
+        return identity.hasRole("scanner");
+    }
+
     public String getMsg() {
         return request.getParam("msg");
     }

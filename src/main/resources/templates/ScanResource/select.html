@@ -11,7 +11,7 @@
   <h2>{c.event.name}</h2>
   <div class="scan-buttons">
     {#for cp in c.checkpoints}
-    <a class="btn primary big" href="/scan/{cp.id}">📷 {cp.name}</a>
+    <a class="btn primary big" href="/s/{c.event.scanCode}/{cp.id}">📷 {cp.name}</a>
     {/for}
   </div>
 </div>
@@ -24,7 +24,7 @@
     <div class="event-date">{c.event.eventDate.de}</div>
     <h2>{c.event.name}</h2>
     <div class="scan-buttons">
-      {#for cp in c.checkpoints}<a class="btn big" href="/scan/{cp.id}">📷 {cp.name}</a>{/for}
+      {#for cp in c.checkpoints}<a class="btn big" href="/s/{c.event.scanCode}/{cp.id}">📷 {cp.name}</a>{/for}
     </div>
   </div>
   {/for}

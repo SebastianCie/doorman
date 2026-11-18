@@ -1,7 +1,9 @@
 package app.doorman.web;
 
+import app.doorman.model.AppUser;
 import app.doorman.service.ScanService;
 import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
@@ -13,9 +15,10 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/api/scan")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({AppUser.ROLE_ADMIN, AppUser.ROLE_SCANNER})
 public class ScanApi {
 
-    public record ScanRequest(String token, Long checkpointId) {
+    public record ScanRequest(String token, String eventCode, Long checkpointId) {
     }
 
     @Inject
@@ -29,6 +32,6 @@ public class ScanApi {
         if (req == null || req.checkpointId() == null) {
             throw new BadRequestException();
         }
-        return scanService.scan(req.token(), req.checkpointId(), identity.getPrincipal().getName());
+        return scanService.scan(req.token(), req.eventCode(), req.checkpointId(), identity.getPrincipal().getName());
     }
 }
