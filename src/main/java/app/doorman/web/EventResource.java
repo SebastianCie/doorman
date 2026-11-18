@@ -51,7 +51,10 @@ public class EventResource {
     public record Summary(Event event, long participants, String checkpointNames) {
     }
 
-    public record Cell(Checkpoint checkpoint, Instant time) {
+    public record Cell(Checkpoint checkpoint, Checkin checkin) {
+        public Instant time() {
+            return checkin == null ? null : checkin.checkedInAt;
+        }
     }
 
     public record Row(Participant participant, List<Cell> cells) {
@@ -131,17 +134,17 @@ public class EventResource {
         List<Checkpoint> cps = Checkpoint.forEvent(id);
         List<Participant> participants = Participant.forEvent(id);
 
-        Map<String, Instant> times = new HashMap<>();
+        Map<String, Checkin> byKey = new HashMap<>();
         Map<Long, Long> perCheckpoint = new HashMap<>();
         List<Checkin> checkins = Checkin.list("participant.event.id", id);
         for (Checkin c : checkins) {
-            times.put(c.participant.id + ":" + c.checkpoint.id, c.checkedInAt);
+            byKey.put(c.participant.id + ":" + c.checkpoint.id, c);
             perCheckpoint.merge(c.checkpoint.id, 1L, Long::sum);
         }
 
         List<Row> rows = new ArrayList<>();
         for (Participant p : participants) {
-            List<Cell> cells = cps.stream().map(cp -> new Cell(cp, times.get(p.id + ":" + cp.id))).toList();
+            List<Cell> cells = cps.stream().map(cp -> new Cell(cp, byKey.get(p.id + ":" + cp.id))).toList();
             rows.add(new Row(p, cells));
         }
         List<Stat> stats = cps.stream()
@@ -251,9 +254,9 @@ public class EventResource {
     public Response export(@PathParam("id") Long id) throws IOException {
         Event event = load(id);
         List<Checkpoint> cps = Checkpoint.forEvent(id);
-        Map<String, Instant> times = new HashMap<>();
+        Map<String, Checkin> byKey = new HashMap<>();
         for (Checkin c : Checkin.<Checkin>list("participant.event.id", id)) {
-            times.put(c.participant.id + ":" + c.checkpoint.id, c.checkedInAt);
+            byKey.put(c.participant.id + ":" + c.checkpoint.id, c);
         }
         StringWriter out = new StringWriter();
         out.write('﻿');
@@ -264,7 +267,8 @@ public class EventResource {
             for (Participant p : Participant.forEvent(id)) {
                 List<String> rec = new ArrayList<>(List.of(nz(p.firstName), nz(p.lastName), nz(p.email), nz(p.note)));
                 for (Checkpoint cp : cps) {
-                    rec.add(TemplateExtensions.dt(times.get(p.id + ":" + cp.id)));
+                    Checkin c = byKey.get(p.id + ":" + cp.id);
+                    rec.add(c == null ? "" : TemplateExtensions.dt(c.checkedInAt) + (c.isManual() ? " (manuell)" : ""));
                 }
                 csv.printRecord(rec);
             }

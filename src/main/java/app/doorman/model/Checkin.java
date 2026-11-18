@@ -35,6 +35,16 @@ public class Checkin extends PanacheEntityBase {
     @Column(name = "checked_in_by")
     public String checkedInBy;
 
+    /** {@link #QR} = per Scan, {@link #MANUAL} = ohne QR-Code nach Prüfung der Personalien. */
+    public String method = QR;
+
+    public static final String QR = "QR";
+    public static final String MANUAL = "MANUAL";
+
+    public boolean isManual() {
+        return MANUAL.equals(method);
+    }
+
     public static Checkin of(Long participantId, Long checkpointId) {
         return find("participant.id = ?1 and checkpoint.id = ?2", participantId, checkpointId).firstResult();
     }

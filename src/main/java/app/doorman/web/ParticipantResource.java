@@ -135,7 +135,8 @@ public class ParticipantResource {
             Checkin c = new Checkin();
             c.participant = p;
             c.checkpoint = cp;
-            c.checkedInBy = identity.getPrincipal().getName() + " (manuell)";
+            c.checkedInBy = identity.getPrincipal().getName();
+            c.method = Checkin.MANUAL;
             c.persist();
             msg = p.getFullName() + ": manuell eingecheckt („" + cp.name + "“).";
         }

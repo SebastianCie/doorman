@@ -88,6 +88,30 @@ class ScanServiceTest {
     }
 
     @Test
+    void manualCheckinAndSearch() {
+        Fixture f = setup();
+        var hits = scanService.search("max must", f.code(), f.hin());
+        assertEquals(1, hits.size());
+        assertEquals("Max Mustermann", hits.get(0).name());
+        assertEquals(null, hits.get(0).checkedInAt());
+        assertEquals(0, scanService.search("x", f.code(), f.hin()).size());
+        assertEquals(0, scanService.search("niemand", f.code(), f.hin()).size());
+        // Suche über fremden Scan-Link-Code ist nicht möglich
+        assertThrows(NotFoundException.class, () -> scanService.search("max", f.otherCode(), f.hin()));
+
+        var first = scanService.manual(hits.get(0).id(), f.code(), f.hin(), "tester");
+        assertEquals(Status.OK, first.status());
+        assertEquals(true, first.manual());
+        assertEquals(Status.ALREADY, scanService.manual(hits.get(0).id(), f.code(), f.hin(), "tester").status());
+        // danach zählt auch der QR-Code als bereits gescannt
+        assertEquals(Status.ALREADY, scanService.scan(f.token(), f.code(), f.hin(), "tester").status());
+        assertNotNull(scanService.search("mustermann", f.code(), f.hin()).get(0).checkedInAt());
+        // Teilnehmer einer anderen Veranstaltung kann nicht über diesen Link eingecheckt werden
+        assertThrows(NotFoundException.class,
+                () -> scanService.manual(hits.get(0).id(), f.otherCode(), f.otherCp(), "tester"));
+    }
+
+    @Test
     void tokenFormat() {
         String t = TokenGenerator.newToken();
         assertEquals(26, t.length());

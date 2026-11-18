@@ -108,6 +108,17 @@ class PagesTest {
         given().filter(scanner).contentType(ContentType.JSON)
                 .body("{\"token\":\"UNBEKANNT\",\"eventCode\":\"" + code + "\",\"checkpointId\":" + cpId + "}")
                 .post("/api/scan").then().statusCode(200).body("status", equalTo("NOT_FOUND"));
+        String pid = given().filter(scanner).queryParam("q", "erika").queryParam("eventCode", code)
+                .queryParam("checkpointId", cpId).get("/api/scan/search")
+                .then().statusCode(200).body("[0].name", equalTo("Erika Musterfrau")).extract().path("[0].id").toString();
+        given().filter(scanner).contentType(ContentType.JSON)
+                .body("{\"participantId\":" + pid + ",\"eventCode\":\"" + code + "\",\"checkpointId\":" + cpId + ",\"verified\":false}")
+                .post("/api/scan/manual").then().statusCode(400);
+        given().filter(scanner).contentType(ContentType.JSON)
+                .body("{\"participantId\":" + pid + ",\"eventCode\":\"" + code + "\",\"checkpointId\":" + cpId + ",\"verified\":true}")
+                .post("/api/scan/manual").then().statusCode(200).body("status", equalTo("OK")).body("manual", equalTo(true));
+        given().filter(cookies).get(eventPath).then().body(containsString("· M"));
+        given().filter(cookies).get(eventPath + "/export.csv").then().body(containsString("(manuell)"));
         given().filter(scanner).get("/account").then().statusCode(200);
         given().filter(scanner).get("/help").then().statusCode(200)
                 .body(containsString("id=\"scannen\"")).body(not(containsString("id=\"teilnehmer\"")));

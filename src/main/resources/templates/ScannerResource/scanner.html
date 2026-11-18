@@ -36,7 +36,38 @@
     <button class="btn">Prüfen</button>
   </form>
 
+  <div class="lookup-open-wrap">
+    <button type="button" id="lookup-open" class="btn lookup-btn">QR-Code vergessen? Teilnehmer suchen</button>
+  </div>
+
   <ul id="history" class="history"></ul>
+
+  <div id="lookup" class="lookup" hidden>
+    <div class="lookup-head">
+      <strong>Teilnehmer suchen</strong>
+      <button type="button" id="lookup-close" class="lookup-close" aria-label="Schließen">✕</button>
+    </div>
+    <input id="lookup-q" type="search" placeholder="Name oder E-Mail" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <p class="lookup-hint">Für Teilnehmer ohne QR-Code: suchen, Personalien prüfen (z. B. Ausweis), dann einchecken.</p>
+    <ul id="lookup-results" class="lookup-results"></ul>
+  </div>
+
+  <dialog id="verify" class="verify">
+    <form method="dialog" id="verify-form">
+      <div class="verify-title">Ohne QR-Code einchecken</div>
+      <div class="verify-name" id="verify-name"></div>
+      <div class="verify-meta" id="verify-email"></div>
+      <div class="verify-meta" id="verify-note"></div>
+      <label class="verify-check">
+        <input type="checkbox" id="verify-ok">
+        <span>Ich habe die Personalien geprüft (z. B. Ausweis)</span>
+      </label>
+      <div class="verify-buttons">
+        <button type="button" class="btn" id="verify-cancel">Abbrechen</button>
+        <button type="submit" class="btn primary" id="verify-submit" disabled>Einchecken</button>
+      </div>
+    </form>
+  </dialog>
 
   <div class="scan-foot">
     Angemeldet als {inject:ctx.username} · <a href="/logout">Abmelden</a>

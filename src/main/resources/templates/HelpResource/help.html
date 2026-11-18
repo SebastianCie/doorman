@@ -169,6 +169,15 @@ Erika;Musterfrau;erika@example.com;</pre></li>
   <div class="legend err"><strong>✕ Falsche Veranstaltung</strong><span>Code einer anderen Veranstaltung, deren Name wird angezeigt. Nicht einlassen.</span></div>
 </div>
 <p>Nach 2–3 Sekunden geht es automatisch weiter, Antippen geht schneller. Oben rechts steht, wie viele schon eingecheckt sind (z. B. 42/100), darunter die letzten Scans.</p>
+<h3 id="ohne-qr">QR-Code vergessen</h3>
+<ol>
+  <li>Unter dem Kamerabild auf <strong>„QR-Code vergessen? Teilnehmer suchen“</strong> tippen.</li>
+  <li>Namen oder E-Mail eintippen, schon 2 Buchstaben genügen („max must“ findet Max Mustermann).</li>
+  <li>Die <strong>Personalien prüfen</strong>, z. B. Ausweis mit Name vergleichen. E-Mail und Bemerkung helfen bei Namensgleichheit.</li>
+  <li>Auf „Einchecken“ tippen, <strong>„Ich habe die Personalien geprüft“</strong> abhaken und bestätigen.</li>
+</ol>
+<p>Der Check-in wird als <strong>manuell</strong> mit deinem Namen gespeichert. Wer an diesem Punkt schon eingecheckt ist, erscheint mit ✓ und Uhrzeit
+  und kann nicht doppelt eingecheckt werden.</p>
 <p><strong>Ohne Kamera:</strong> Unter dem Kamerabild kann der Code auch abgetippt werden. Den 26-stelligen Code sieht der Admin beim Teilnehmer unter „Bearbeiten“.</p>
 <p><strong>Als App auf den Home-Bildschirm:</strong> iPhone: in Safari <em>Teilen → Zum Home-Bildschirm</em>. Android: im Chrome-Menü
   <em>Zum Startbildschirm hinzufügen</em>. Das Symbol öffnet danach direkt die Scan-Seite dieser Veranstaltung.</p>
@@ -181,7 +190,9 @@ Erika;Musterfrau;erika@example.com;</pre></li>
   <li><strong>Übersicht:</strong> Oben auf der Veranstaltungsseite steht pro Check-in-Punkt eine Karte, z. B. „Hinfahrt 42 / 100“. Ein Klick öffnet den Scanner.
     Neu laden aktualisiert die Zahlen.</li>
   <li><strong>Wer fehlt noch?</strong> Im Filter „Fehlt bei: Hinfahrt“ wählen.</li>
-  <li><strong>Manuell einchecken:</strong> In der Spalte des Check-in-Punkts auf „–“ klicken und bestätigen, z. B. wenn jemand sein Handy vergessen hat.</li>
+  <li><strong>Manuell einchecken:</strong> In der Spalte des Check-in-Punkts auf „–“ klicken und bestätigen, z. B. wenn jemand sein Handy vergessen hat.
+    Scanner können das am Handy selbst (siehe <a href="#ohne-qr">QR-Code vergessen</a>).</li>
+  <li><strong>„✓ 08:14 · M“</strong> bedeutet: manuell eingecheckt, ohne QR-Code. Mit der Maus darüber sieht man, von wem. Im Export steht „(manuell)“.</li>
   <li><strong>Check-in zurücknehmen:</strong> Auf „✓ 08:14“ klicken und bestätigen.</li>
   <li><strong>Export:</strong> „Export“ lädt eine Excel-taugliche Liste mit allen Check-in-Zeiten herunter.</li>
 </ul>
@@ -198,8 +209,9 @@ Erika;Musterfrau;erika@example.com;</pre></li>
     Android: auf das Schloss in der Adresszeile tippen, Kamera erlauben.</td></tr>
   <tr><td>„Bitte neu anmelden“ beim Scannen</td><td>Die Anmeldung ist abgelaufen. Auf die Meldung tippen, anmelden, weiterscannen.</td></tr>
   <tr><td>„Verbindungsfehler“</td><td>Kein Internet. Doorman braucht beim Scannen eine Verbindung. WLAN/Mobilfunk prüfen, erneut scannen.</td></tr>
-  <tr><td>QR-Code wird nicht erkannt</td><td>Display heller stellen, Handy ruhig halten, 15–30 cm Abstand. Notfalls Code abtippen oder manuell einchecken lassen.</td></tr>
-  <tr><td>„QR-Code nicht gefunden“, obwohl angemeldet</td><td>Vermutlich ein alter Code, nachdem ein neuer erzeugt wurde. Teilnehmer in der Liste manuell einchecken.</td></tr>
+  <tr><td>Teilnehmer hat seinen QR-Code vergessen</td><td>„QR-Code vergessen? Teilnehmer suchen“, Personalien prüfen, einchecken (siehe <a href="#ohne-qr">oben</a>).</td></tr>
+  <tr><td>QR-Code wird nicht erkannt</td><td>Display heller stellen, Handy ruhig halten, 15–30 cm Abstand. Notfalls Code abtippen oder per Suche ohne QR-Code einchecken.</td></tr>
+  <tr><td>„QR-Code nicht gefunden“, obwohl angemeldet</td><td>Vermutlich ein alter Code, nachdem ein neuer erzeugt wurde. Teilnehmer suchen und ohne QR-Code einchecken.</td></tr>
   <tr><td>„Falsche Veranstaltung“</td><td>Der Code gehört zu einer anderen Reise. Nach der richtigen E-Mail fragen.</td></tr>
   <tr><td>Scan-Link zeigt „Nicht gefunden“</td><td>Der Link wurde erneuert. Beim Veranstalter den aktuellen Link anfragen.</td></tr>
   <tr><td>Scanner sieht keine Veranstaltungen</td><td>Richtig so: Scanner kommen nur über den Scan-Link an eine Veranstaltung.</td></tr>

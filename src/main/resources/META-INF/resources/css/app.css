@@ -328,3 +328,37 @@ td form { margin: 0; }
 .theme-toggle button:hover { color: var(--text); }
 .theme-toggle button[aria-pressed="true"] { background: var(--primary); color: #fff; }
 .theme-toggle svg { width: 16px; height: 16px; }
+
+/* Scanner: ohne QR-Code suchen */
+.lookup-open-wrap { padding: 0 16px 12px; }
+.lookup-btn { width: 100%; background: #1e293b; border-color: #334155; color: #fff; }
+.lookup-btn:hover { background: #273449; }
+.lookup {
+  position: fixed; inset: 0; z-index: 5; background: #0f172a; color: #fff; display: flex; flex-direction: column;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); gap: 10px;
+  max-width: 600px; margin: 0 auto;
+}
+.lookup[hidden] { display: none; }
+.lookup-head { display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; }
+.lookup-close { background: none; border: 0; color: #fff; font-size: 1.4rem; cursor: pointer; padding: 4px 8px; }
+.lookup input { background: #1e293b; border-color: #334155; color: #fff; font-size: 1.05rem; padding: 12px; }
+.lookup-hint { margin: 0; color: #94a3b8; font-size: 0.85rem; }
+.lookup-results { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+.lookup-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e293b; }
+.lookup-info { flex: 1; min-width: 0; }
+.lookup-name { font-weight: 600; font-size: 1.05rem; }
+.lookup-meta { color: #94a3b8; font-size: 0.85rem; overflow-wrap: anywhere; }
+.lookup-done { color: #86efac; font-weight: 600; white-space: nowrap; }
+.lookup-empty { color: #94a3b8; padding: 16px 0; }
+
+.verify {
+  border: 0; border-radius: 14px; padding: 20px; width: min(92vw, 420px); background: #1e293b; color: #fff;
+}
+.verify::backdrop { background: rgba(0, 0, 0, 0.6); }
+.verify-title { color: #94a3b8; font-size: 0.9rem; }
+.verify-name { font-size: 1.5rem; font-weight: 700; margin: 4px 0; }
+.verify-meta { color: #cbd5e1; overflow-wrap: anywhere; }
+.verify-check { flex-direction: row; align-items: flex-start; gap: 10px; margin: 16px 0; font-size: 1rem; cursor: pointer; }
+.verify-check input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.verify-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+.verify-buttons .btn:not(.primary) { background: transparent; border-color: #475569; color: #fff; }

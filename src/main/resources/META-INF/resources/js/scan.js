@@ -63,6 +63,7 @@ function show(status, data) {
   let detail = '';
   if (status === 'ALREADY') detail = 'um ' + time(data.time) + ' Uhr';
   else if (status === 'WRONG_EVENT') detail = 'Code gehört zu: ' + data.otherEvent;
+  else if (status === 'OK' && data.manual) detail = 'Ohne QR-Code · Personalien geprüft' + (data.note ? ' · ' + data.note : '');
   else if (status === 'OK' && data.note) detail = data.note;
   else if (status === 'SESSION') detail = 'Sitzung abgelaufen – hier tippen';
   else if (status === 'ERROR') detail = 'Bitte erneut versuchen';
@@ -171,4 +172,133 @@ document.addEventListener('visibilitychange', () => {
   if (!scanner) return;
   if (document.hidden) scanner.stop();
   else scanner.start().catch(() => { startOverlay.hidden = false; startBtn.disabled = false; });
+});
+
+// ---------- Ohne QR-Code: Teilnehmer suchen und nach Prüfung der Personalien einchecken ----------
+const lookup = document.getElementById('lookup');
+const lookupQ = document.getElementById('lookup-q');
+const lookupResults = document.getElementById('lookup-results');
+const verify = document.getElementById('verify');
+const verifyOk = document.getElementById('verify-ok');
+const verifySubmit = document.getElementById('verify-submit');
+let searchTimer = null;
+let searchSeq = 0;
+let selected = null;
+
+function openLookup() {
+  busy = true; // Kamera-Treffer ignorieren, solange gesucht wird
+  lookup.hidden = false;
+  lookupQ.value = '';
+  lookupResults.replaceChildren();
+  lookupQ.focus();
+}
+
+function closeLookup() {
+  lookup.hidden = true;
+  busy = false;
+  lastCode = null;
+}
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text) e.textContent = text;
+  return e;
+}
+
+function renderHits(hits, q) {
+  lookupResults.replaceChildren();
+  if (!hits.length) {
+    lookupResults.append(el('li', 'lookup-empty', 'Niemand gefunden für „' + q + '“'));
+    return;
+  }
+  for (const h of hits) {
+    const li = el('li', 'lookup-item');
+    const info = el('div', 'lookup-info');
+    info.append(el('div', 'lookup-name', h.name || '(ohne Namen)'));
+    if (h.email) info.append(el('div', 'lookup-meta', h.email));
+    if (h.note) info.append(el('div', 'lookup-meta', h.note));
+    li.append(info);
+    if (h.checkedInAt) {
+      li.append(el('span', 'lookup-done', '✓ ' + time(h.checkedInAt)));
+    } else {
+      const btn = el('button', 'btn primary small', 'Einchecken');
+      btn.type = 'button';
+      btn.addEventListener('click', () => openVerify(h));
+      li.append(btn);
+    }
+    lookupResults.append(li);
+  }
+}
+
+async function search() {
+  const q = lookupQ.value.trim();
+  const seq = ++searchSeq;
+  if (q.length < 2) {
+    lookupResults.replaceChildren();
+    return;
+  }
+  try {
+    const url = '/api/scan/search?' + new URLSearchParams({ q, eventCode, checkpointId: String(checkpointId) });
+    const r = await fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+    const type = r.headers.get('content-type') || '';
+    if (seq !== searchSeq) return; // veraltete Antwort
+    if (r.redirected || !type.includes('json')) {
+      closeLookup();
+      show('SESSION');
+      return;
+    }
+    renderHits(await r.json(), q);
+  } catch (e) {
+    console.error(e);
+    lookupResults.replaceChildren(el('li', 'lookup-empty', 'Verbindungsfehler – bitte erneut versuchen'));
+  }
+}
+
+function openVerify(hit) {
+  selected = hit;
+  document.getElementById('verify-name').textContent = hit.name;
+  document.getElementById('verify-email').textContent = hit.email || '';
+  document.getElementById('verify-note').textContent = hit.note || '';
+  verifyOk.checked = false;
+  verifySubmit.disabled = true;
+  verify.showModal();
+}
+
+verifyOk.addEventListener('change', () => { verifySubmit.disabled = !verifyOk.checked; });
+document.getElementById('verify-cancel').addEventListener('click', () => verify.close());
+
+document.getElementById('verify-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!selected || !verifyOk.checked) return;
+  verifySubmit.disabled = true;
+  try {
+    const r = await fetch('/api/scan/manual', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ participantId: selected.id, eventCode, checkpointId, verified: true }),
+    });
+    const type = r.headers.get('content-type') || '';
+    verify.close();
+    closeLookup();
+    if (r.redirected || !type.includes('json')) { show('SESSION'); return; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    busy = true;
+    const data = await r.json();
+    show(data.status, data);
+  } catch (err) {
+    console.error(err);
+    verify.close();
+    closeLookup();
+    busy = true;
+    show('ERROR');
+  }
+});
+
+document.getElementById('lookup-open').addEventListener('click', openLookup);
+document.getElementById('lookup-close').addEventListener('click', closeLookup);
+lookupQ.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(search, 250);
 });

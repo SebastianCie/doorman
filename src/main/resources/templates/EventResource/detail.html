@@ -118,7 +118,7 @@
       <form method="post" action="/events/{event.id}/participants/{r.participant.id}/checkin/{c.checkpoint.id}"
             {#if c.time}data-confirm="Check-in „{c.checkpoint.name}“ von {r.participant.fullName} zurücknehmen?"{#else}data-confirm="{r.participant.fullName} manuell für „{c.checkpoint.name}“ einchecken?"{/if}>
         {#if c.time}
-          <button class="badge ok" title="Klicken zum Zurücknehmen">✓ {c.time.hm}</button>
+          <button class="badge ok" title="{#if c.checkin.manual}Manuell (Personalien geprüft){#else}Per QR-Code{/if} von {c.checkin.checkedInBy ?: '?'} · Klicken zum Zurücknehmen">✓ {c.time.hm}{#if c.checkin.manual} · M{/if}</button>
         {#else}
           <button class="badge none" title="Manuell einchecken">–</button>
         {/if}
