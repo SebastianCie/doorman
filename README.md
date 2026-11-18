@@ -31,30 +31,32 @@ Tests: `./mvnw test`
 
 ## Auf OpenShift deployen
 
-1. Datenbank in der bestehenden PostgreSQL anlegen (Tabellen erzeugt Flyway beim Start automatisch):
-   ```sql
-   create user doorman with password '...';
-   create database doorman owner doorman;
-   ```
-2. Secret anlegen:
-   ```bash
-   cp openshift/secret.example.yaml openshift/secret.yaml   # Werte eintragen (wird nicht eingecheckt)
-   oc apply -f openshift/secret.yaml
-   ```
-3. Image bauen und in die Cluster-Registry pushen (oder über eure CI/BuildConfig, Strategie *Docker* mit `Containerfile`):
-   ```bash
-   podman build -t doorman -f Containerfile .
-   REG=$(oc get route default-route -n openshift-image-registry -o jsonpath='{.spec.host}')
-   podman login -u $(oc whoami) -p $(oc whoami -t) $REG
-   podman tag doorman $REG/<namespace>/doorman:latest
-   podman push $REG/<namespace>/doorman:latest
-   ```
-4. `<namespace>` in `openshift/deployment.yaml` eintragen, dann:
-   ```bash
-   oc apply -f openshift/deployment.yaml -f openshift/service.yaml -f openshift/route.yaml
-   oc get route doorman      # URL
-   ```
-5. Mit `admin` und dem `INITIAL_ADMIN_PASSWORD` anmelden, Passwort unter *Konto* ändern und unter *Benutzer* die weiteren Accounts anlegen.
+Das Container-Image baut GitHub Actions bei jedem Push auf `main`: `ghcr.io/sebastiancie/doorman:latest`
+(Workflow: [.github/workflows/image.yml](.github/workflows/image.yml)). Die Datenbank läuft extern (z. B. Neon),
+deshalb lässt sich die App jederzeit neu aufsetzen, ohne Daten zu verlieren.
+
+**Einmalig**
+```bash
+brew install openshift-cli                 # falls oc fehlt
+cp deploy/.env.example deploy/.env         # DATABASE_URL und INITIAL_ADMIN_PASSWORD eintragen
+```
+Das Paket `doorman` unter *GitHub → Profil → Packages* einmal auf **Public** stellen, damit OpenShift es ohne
+Zugangsdaten laden kann.
+
+**Deployen, aktualisieren oder nach einem Cluster-Reset wiederherstellen**
+```bash
+oc login --token=... --server=...          # "Copy login command" in der OpenShift-Konsole
+./deploy/deploy.sh
+```
+Das Skript legt im aktuellen Projekt Secret, Deployment, Service und Route an (oder aktualisiert sie), startet mit
+dem neuesten Image neu und gibt am Ende die URL aus. Beim ersten Lauf erzeugt es `SESSION_ENCRYPTION_KEY` und
+speichert ihn in `deploy/.env`. `deploy/.env` wird nicht eingecheckt.
+
+Die Neon-URL kann so eingetragen werden, wie Neon sie anzeigt. Das Skript wandelt sie in eine JDBC-URL um und
+nutzt statt des `-pooler`-Hosts die direkte Verbindung (für die Flyway-Migrationen).
+
+Die Manifeste liegen in [openshift/](openshift/). Für manuelle Deployments ohne Skript gibt es
+`openshift/secret.example.yaml`.
 
 ### Umgebungsvariablen
 

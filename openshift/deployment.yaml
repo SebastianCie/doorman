@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: doorman
-          # Siehe README: Image bauen und in die OpenShift-Registry pushen
-          image: image-registry.openshift-image-registry.svc:5000/<namespace>/doorman:latest
+          # Wird von GitHub Actions gebaut (.github/workflows/image.yml); deploy/deploy.sh setzt es
+          image: ghcr.io/sebastiancie/doorman:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
