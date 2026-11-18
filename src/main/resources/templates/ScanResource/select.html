@@ -1,0 +1,33 @@
+{#include base}
+{#title}Scannen{/title}
+<h1>Scannen</h1>
+<p class="muted">Veranstaltung und Check-in-Punkt wählen.</p>
+{#if upcoming.isEmpty && past.isEmpty}
+  <div class="card empty">Keine Veranstaltungen vorhanden.</div>
+{/if}
+{#for c in upcoming}
+<div class="card scan-choice">
+  <div class="event-date">{#if c.event.eventDate}{c.event.eventDate.de}{#else}ohne Datum{/if}</div>
+  <h2>{c.event.name}</h2>
+  <div class="scan-buttons">
+    {#for cp in c.checkpoints}
+    <a class="btn primary big" href="/scan/{cp.id}">📷 {cp.name}</a>
+    {/for}
+  </div>
+</div>
+{/for}
+{#if !past.isEmpty}
+<details class="past">
+  <summary>Vergangene Veranstaltungen</summary>
+  {#for c in past}
+  <div class="card scan-choice">
+    <div class="event-date">{c.event.eventDate.de}</div>
+    <h2>{c.event.name}</h2>
+    <div class="scan-buttons">
+      {#for cp in c.checkpoints}<a class="btn big" href="/scan/{cp.id}">📷 {cp.name}</a>{/for}
+    </div>
+  </div>
+  {/for}
+</details>
+{/if}
+{/include}

@@ -1,0 +1,50 @@
+{#include base}
+{#title}Benutzer{/title}
+<h1>Benutzer</h1>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Benutzername</th><th>Rolle</th><th>Passwort zurücksetzen</th><th></th></tr></thead>
+  <tbody>
+  {#for u in users}
+  <tr>
+    <td><strong>{u.username}</strong></td>
+    <td>
+      <form method="post" action="/users/{u.id}/role" class="inline-form">
+        <select name="role" onchange="this.form.submit()">
+          <option value="user" {#if !u.admin}selected{/if}>Benutzer</option>
+          <option value="admin" {#if u.admin}selected{/if}>Admin</option>
+        </select>
+      </form>
+    </td>
+    <td>
+      <form method="post" action="/users/{u.id}/password" class="inline-form">
+        <input name="password" type="password" minlength="8" placeholder="Neues Passwort" required autocomplete="new-password">
+        <button class="btn small">Setzen</button>
+      </form>
+    </td>
+    <td>
+      {#if u.username != inject:ctx.username}
+      <form method="post" action="/users/{u.id}/delete" data-confirm="Benutzer {u.username} löschen?">
+        <button class="btn small danger">Löschen</button>
+      </form>
+      {/if}
+    </td>
+  </tr>
+  {/for}
+  </tbody>
+</table>
+</div>
+<h2>Neuer Benutzer</h2>
+<form method="post" action="/users" class="card grid-form">
+  <label>Benutzername <input name="username" required autocapitalize="none" autocomplete="off"></label>
+  <label>Passwort <input name="password" type="password" minlength="8" required autocomplete="new-password"></label>
+  <label>Rolle
+    <select name="role">
+      <option value="user">Benutzer</option>
+      <option value="admin">Admin</option>
+    </select>
+  </label>
+  <button class="btn primary">Anlegen</button>
+</form>
+<p class="muted small">Benutzer können Veranstaltungen verwalten und scannen. Admins können zusätzlich Benutzer verwalten.</p>
+{/include}

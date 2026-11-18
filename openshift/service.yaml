@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: doorman
+  labels:
+    app: doorman
+spec:
+  selector:
+    app: doorman
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

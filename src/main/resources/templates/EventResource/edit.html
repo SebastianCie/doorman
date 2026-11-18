@@ -1,0 +1,46 @@
+{#include base}
+{#title}{event.name} bearbeiten{/title}
+<p><a href="/events/{event.id}">← {event.name}</a></p>
+<h1>Veranstaltung bearbeiten</h1>
+<form method="post" action="/events/{event.id}/edit" class="card stack narrow">
+  <label>Name *
+    <input name="name" required maxlength="200" value="{event.name}">
+  </label>
+  <label>Datum
+    <input name="date" type="date" value="{event.eventDate ?: ''}">
+  </label>
+  <label>Beschreibung
+    <textarea name="description" rows="3">{event.description ?: ''}</textarea>
+  </label>
+  <button class="btn primary">Speichern</button>
+</form>
+
+<h2>Check-in-Punkte</h2>
+<div class="card stack narrow">
+  {#for cp in checkpoints}
+  <div class="inline-row">
+    <form method="post" action="/events/{event.id}/checkpoints/{cp.id}" class="inline-form grow">
+      <input name="name" value="{cp.name}" required maxlength="100">
+      <button class="btn">Umbenennen</button>
+    </form>
+    {#if checkpoints.size > 1}
+    <form method="post" action="/events/{event.id}/checkpoints/{cp.id}/delete"
+          data-confirm="Check-in-Punkt „{cp.name}“ und alle zugehörigen Check-ins löschen?">
+      <button class="btn danger">Löschen</button>
+    </form>
+    {/if}
+  </div>
+  {/for}
+  <form method="post" action="/events/{event.id}/checkpoints" class="inline-form">
+    <input name="name" placeholder="Neuer Check-in-Punkt, z. B. Rückfahrt" required maxlength="100" class="grow">
+    <button class="btn primary">Hinzufügen</button>
+  </form>
+</div>
+
+<h2>Gefahrenzone</h2>
+<form method="post" action="/events/{event.id}/delete" class="card narrow"
+      data-confirm="Veranstaltung „{event.name}“ mit allen Teilnehmern und Check-ins endgültig löschen?">
+  <p>Löscht die Veranstaltung mit allen Teilnehmerdaten, z. B. nach Ende der Reise (Datenschutz).</p>
+  <button class="btn danger">Veranstaltung löschen</button>
+</form>
+{/include}

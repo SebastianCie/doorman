@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doorman
+  labels:
+    app: doorman
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doorman
+  template:
+    metadata:
+      labels:
+        app: doorman
+    spec:
+      containers:
+        - name: doorman
+          # Siehe README: Image bauen und in die OpenShift-Registry pushen
+          image: image-registry.openshift-image-registry.svc:5000/<namespace>/doorman:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - secretRef:
+                name: doorman
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20

@@ -1,0 +1,17 @@
+# HTTPS ist Pflicht: ohne TLS gibt der Browser die Kamera nicht frei.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: doorman
+  labels:
+    app: doorman
+spec:
+  # host: doorman.apps.<cluster-domain>   # optional, sonst automatisch vergeben
+  to:
+    kind: Service
+    name: doorman
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

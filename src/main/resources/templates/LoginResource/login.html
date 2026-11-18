@@ -1,0 +1,18 @@
+{#include base}
+{#title}Anmelden{/title}
+<div class="login">
+  <img src="/icons/icon-192.png" alt="" class="login-logo">
+  <h1>Doorman</h1>
+  <p class="muted">Zutrittskontrolle per QR-Code</p>
+  {#if error}<div class="flash err">Benutzername oder Passwort falsch.</div>{/if}
+  <form method="post" action="/j_security_check" class="card stack">
+    <label>Benutzername
+      <input name="j_username" autocomplete="username" autocapitalize="none" required autofocus>
+    </label>
+    <label>Passwort
+      <input name="j_password" type="password" autocomplete="current-password" required>
+    </label>
+    <button class="btn primary">Anmelden</button>
+  </form>
+</div>
+{/include}

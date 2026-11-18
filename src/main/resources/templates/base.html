@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{#insert title}Doorman{/} · Doorman</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-180.png">
+  <meta name="theme-color" content="#1d4ed8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Doorman">
+</head>
+<body>
+{#if inject:ctx.loggedIn}
+<header class="topbar">
+  <a class="brand" href="/events"><img src="/icons/icon-192.png" alt=""> Doorman</a>
+  <nav>
+    <a href="/events">Veranstaltungen</a>
+    <a href="/scan">Scannen</a>
+    {#if inject:ctx.admin}<a href="/users">Benutzer</a>{/if}
+    <a href="/account" title="Konto">{inject:ctx.username}</a>
+    <a href="/logout">Abmelden</a>
+  </nav>
+</header>
+{/if}
+<main class="container">
+  {#if inject:ctx.msg}<div class="flash ok">{inject:ctx.msg}</div>{/if}
+  {#if inject:ctx.err}<div class="flash err">{inject:ctx.err}</div>{/if}
+  {#insert}{/}
+</main>
+<script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{#include base}
+{#title}Veranstaltungen{/title}
+<div class="page-head">
+  <h1>Veranstaltungen</h1>
+  <a class="btn primary" href="/events/new">+ Neue Veranstaltung</a>
+</div>
+{#if events.isEmpty}
+  <div class="card empty">Noch keine Veranstaltungen. Lege die erste an.</div>
+{#else}
+  <div class="cards">
+  {#for s in events}
+    <a class="card event-card" href="/events/{s.event.id}">
+      <div class="event-date">{#if s.event.eventDate}{s.event.eventDate.de}{#else}ohne Datum{/if}</div>
+      <h2>{s.event.name}</h2>
+      <div class="muted">{s.participants} Teilnehmer · {s.checkpointNames}</div>
+    </a>
+  {/for}
+  </div>
+{/if}
+{/include}

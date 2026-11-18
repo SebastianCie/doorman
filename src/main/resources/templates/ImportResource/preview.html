@@ -1,0 +1,36 @@
+{#include base}
+{#title}Import-Vorschau{/title}
+<p><a href="/events/{event.id}/import">← Andere Datei wählen</a></p>
+<h1>Import-Vorschau</h1>
+<p class="muted">Erkannt: {result.encoding}, Trennzeichen {result.delimiter},
+  {#if result.headerDetected}mit Kopfzeile{#else}ohne Kopfzeile (Reihenfolge Vorname, Nachname, E-Mail, Bemerkung){/if}.</p>
+<div class="card">
+  <strong>{result.countNew}</strong> neue Teilnehmer werden importiert{#if result.countSkipped > 0},
+  <strong>{result.countSkipped}</strong> Zeilen werden übersprungen{/if}.
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Zeile</th><th>Vorname</th><th>Nachname</th><th>E-Mail</th><th>Bemerkung</th><th>Status</th></tr></thead>
+  <tbody>
+  {#for row in result.rows}
+  <tr class="{#if !row.isNew}skipped{/if}">
+    <td>{row.line}</td>
+    <td>{row.firstName ?: ''}</td>
+    <td>{row.lastName ?: ''}</td>
+    <td>{row.email ?: ''}</td>
+    <td>{row.note ?: ''}</td>
+    <td>{#if row.isNew}<span class="badge ok">neu</span>{#else}<span class="badge warn">{row.message}</span>{/if}</td>
+  </tr>
+  {/for}
+  </tbody>
+</table>
+</div>
+{#if result.countNew > 0}
+<form method="post" action="/events/{event.id}/import/confirm">
+  <textarea name="text" hidden>{result.text}</textarea>
+  <input type="hidden" name="encoding" value="{result.encoding}">
+  <button class="btn primary">{result.countNew} Teilnehmer importieren</button>
+  <a class="btn" href="/events/{event.id}">Abbrechen</a>
+</form>
+{/if}
+{/include}

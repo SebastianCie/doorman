@@ -1,0 +1,110 @@
+{#include base}
+{#title}{event.name}{/title}
+<p><a href="/events">← Veranstaltungen</a></p>
+<div class="page-head">
+  <div>
+    <h1>{event.name}</h1>
+    <div class="muted">{#if event.eventDate}{event.eventDate.de}{#else}ohne Datum{/if}{#if event.description} · {event.description}{/if}</div>
+  </div>
+  <div class="row-buttons">
+    <a class="btn" href="/events/{event.id}/edit">Bearbeiten</a>
+    <a class="btn" href="/events/{event.id}/import">CSV-Import</a>
+    <a class="btn" href="/events/{event.id}/export.csv">Export</a>
+  </div>
+</div>
+
+<div class="stats">
+  {#for s in stats}
+  <a class="card stat" href="/scan/{s.checkpoint.id}" title="Scanner für „{s.checkpoint.name}“ öffnen">
+    <div class="stat-label">{s.checkpoint.name}</div>
+    <div class="stat-value">{s.count} <span>/ {s.total}</span></div>
+    <div class="bar"><div style="width: {s.percent}%"></div></div>
+    <div class="stat-link">Scannen →</div>
+  </a>
+  {/for}
+</div>
+
+<details class="card add-participant" {#if rows.isEmpty}open{/if}>
+  <summary>+ Teilnehmer hinzufügen</summary>
+  <form method="post" action="/events/{event.id}/participants" class="grid-form">
+    <label>Vorname <input name="firstName" maxlength="100"></label>
+    <label>Nachname <input name="lastName" maxlength="100"></label>
+    <label>E-Mail <input name="email" type="email" maxlength="255"></label>
+    <label>Bemerkung <input name="note"></label>
+    <button class="btn primary">Hinzufügen</button>
+  </form>
+</details>
+
+{#if rows.isEmpty}
+  <div class="card empty">Noch keine Teilnehmer. Füge sie einzeln hinzu oder nutze den
+    <a href="/events/{event.id}/import">CSV-Import</a>.</div>
+{#else}
+<div class="toolbar">
+  <input type="search" id="filter" placeholder="Suchen …" class="grow">
+  <select id="filter-status">
+    <option value="">Alle ({rows.size})</option>
+    <option value="unsent">QR noch nicht versendet</option>
+    {#for cp in checkpoints}
+    <option value="missing-{cp.id}">Fehlt bei: {cp.name}</option>
+    {/for}
+  </select>
+</div>
+<div class="table-wrap">
+<table class="participants" id="participants">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>E-Mail</th>
+    <th>QR-Code</th>
+    <th title="QR-Code per E-Mail versendet">Versendet</th>
+    {#for cp in checkpoints}<th>{cp.name}</th>{/for}
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  {#for r in rows}
+  <tr id="p{r.participant.id}" data-search="{r.participant.fullName} {r.participant.email ?: ''} {r.participant.note ?: ''}"
+      data-sent="{#if r.participant.sentAt}1{#else}0{/if}"
+      data-missing="{#for c in r.cells}{#if !c.time}missing-{c.checkpoint.id} {/if}{/for}">
+    <td>
+      <strong>{r.participant.fullName}</strong>
+      {#if r.participant.note}<div class="muted small">{r.participant.note}</div>{/if}
+    </td>
+    <td>
+      {#if r.participant.email}
+      <button type="button" class="link-btn" data-copy-text="{r.participant.email}" title="E-Mail-Adresse kopieren">{r.participant.email}</button>
+      {/if}
+    </td>
+    <td class="nowrap">
+      <button type="button" class="btn small primary"
+              data-copy-qr="/events/{event.id}/participants/{r.participant.id}/qr.png"
+              data-sent-url="/events/{event.id}/participants/{r.participant.id}/sent">QR kopieren</button>
+      <a class="btn small" href="/events/{event.id}/participants/{r.participant.id}/qr.png?download=true" title="Als PNG herunterladen">↓</a>
+    </td>
+    <td class="center">
+      <input type="checkbox" class="sent-toggle" {#if r.participant.sentAt}checked{/if}
+             data-sent-url="/events/{event.id}/participants/{r.participant.id}/sent"
+             title="{#if r.participant.sentAt}versendet am {r.participant.sentAt.dt}{#else}noch nicht versendet{/if}">
+    </td>
+    {#for c in r.cells}
+    <td class="nowrap">
+      <form method="post" action="/events/{event.id}/participants/{r.participant.id}/checkin/{c.checkpoint.id}"
+            {#if c.time}data-confirm="Check-in „{c.checkpoint.name}“ von {r.participant.fullName} zurücknehmen?"{#else}data-confirm="{r.participant.fullName} manuell für „{c.checkpoint.name}“ einchecken?"{/if}>
+        {#if c.time}
+          <button class="badge ok" title="Klicken zum Zurücknehmen">✓ {c.time.hm}</button>
+        {#else}
+          <button class="badge none" title="Manuell einchecken">–</button>
+        {/if}
+      </form>
+    </td>
+    {/for}
+    <td><a href="/events/{event.id}/participants/{r.participant.id}/edit" class="btn small">Bearbeiten</a></td>
+  </tr>
+  {/for}
+  </tbody>
+</table>
+</div>
+<p class="muted small">Tipp: Mit „QR kopieren“ landet das Bild in der Zwischenablage. In Outlook in die neue
+  E-Mail einfügen (⌘V / Strg+V). Der Teilnehmer wird dabei automatisch als „versendet“ markiert.</p>
+{/if}
+{/include}

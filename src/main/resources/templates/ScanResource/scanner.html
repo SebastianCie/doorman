@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>{checkpoint.name} · {event.name} · Doorman</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/icon-180.png">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body class="scanner-body">
+<div id="scanner" data-checkpoint-id="{checkpoint.id}">
+  <header class="scan-head">
+    <a href="/scan" class="scan-back" aria-label="Zurück">←</a>
+    <div class="scan-title">
+      <div class="scan-event">{event.name}</div>
+      <div class="scan-cp">{checkpoint.name}</div>
+    </div>
+    <div class="scan-count"><span id="count">{checkedIn}</span>/<span id="total">{total}</span></div>
+  </header>
+
+  <div class="video-wrap">
+    <video id="video" playsinline muted></video>
+    <div id="start" class="start-overlay">
+      <button id="start-btn" class="btn primary big">📷 Kamera starten</button>
+      <p id="start-hint" class="muted"></p>
+    </div>
+  </div>
+
+  <form id="manual" class="manual" autocomplete="off">
+    <input id="manual-code" placeholder="Code manuell eingeben" autocapitalize="characters" spellcheck="false">
+    <button class="btn">Prüfen</button>
+  </form>
+
+  <ul id="history" class="history"></ul>
+
+  <div id="result" class="result hidden" role="status" aria-live="assertive">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-name" id="result-name"></div>
+    <div class="result-detail" id="result-detail"></div>
+    <div class="result-hint">Tippen zum Fortfahren</div>
+  </div>
+</div>
+<script type="module" src="/js/scan.js"></script>
+</body>
+</html>

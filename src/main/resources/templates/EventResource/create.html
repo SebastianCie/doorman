@@ -1,0 +1,25 @@
+{#include base}
+{#title}Neue Veranstaltung{/title}
+<p><a href="/events">← Veranstaltungen</a></p>
+<h1>Neue Veranstaltung</h1>
+<form method="post" action="/events" class="card stack narrow">
+  <label>Name *
+    <input name="name" required maxlength="200" placeholder="z. B. Busreise Gardasee 2027">
+  </label>
+  <label>Datum
+    <input name="date" type="date">
+  </label>
+  <label>Beschreibung
+    <textarea name="description" rows="3"></textarea>
+  </label>
+  <label>Check-in-Punkte (einer pro Zeile)
+    <textarea name="checkpoints" rows="3">Einlass</textarea>
+    <small class="muted">Für Busreisen z. B. „Hinfahrt“ und „Rückfahrt“ in zwei Zeilen. Jeder Teilnehmer
+      behält einen QR-Code, der an jedem Punkt einmal gescannt werden kann.</small>
+  </label>
+  <div class="row-buttons">
+    <button type="button" class="btn" data-fill="checkpoints" data-value="Hinfahrt&#10;Rückfahrt">Vorlage: Hin- &amp; Rückfahrt</button>
+    <button class="btn primary">Anlegen</button>
+  </div>
+</form>
+{/include}

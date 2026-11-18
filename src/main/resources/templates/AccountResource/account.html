@@ -1,0 +1,11 @@
+{#include base}
+{#title}Konto{/title}
+<h1>Passwort ändern</h1>
+<p class="muted">Angemeldet als <strong>{inject:ctx.username}</strong></p>
+<form method="post" action="/account" class="card stack narrow">
+  <label>Aktuelles Passwort <input name="current" type="password" required autocomplete="current-password"></label>
+  <label>Neues Passwort <input name="password" type="password" minlength="8" required autocomplete="new-password"></label>
+  <label>Neues Passwort wiederholen <input name="repeat" type="password" minlength="8" required autocomplete="new-password"></label>
+  <button class="btn primary">Ändern</button>
+</form>
+{/include}

@@ -1,0 +1,22 @@
+{#include base}
+{#title}CSV-Import{/title}
+<p><a href="/events/{event.id}">← {event.name}</a></p>
+<h1>Teilnehmer importieren</h1>
+<form method="post" action="/events/{event.id}/import/preview" enctype="multipart/form-data" class="card stack narrow">
+  <label>CSV-Datei
+    <input type="file" name="file" accept=".csv,text/csv" required>
+  </label>
+  <button class="btn primary">Vorschau anzeigen</button>
+</form>
+<div class="card narrow">
+  <h3>Format</h3>
+  <p>Am einfachsten in Excel: <em>Datei → Speichern unter → CSV (Trennzeichen-getrennt)</em>.
+    Semikolon oder Komma sowie UTF-8 oder Windows-Zeichensatz werden automatisch erkannt.</p>
+  <p>Erste Zeile mit Spaltennamen, zum Beispiel:</p>
+  <pre>Vorname;Nachname;E-Mail;Bemerkung
+Max;Mustermann;max@example.com;Sitz 12
+Erika;Musterfrau;erika@example.com;</pre>
+  <p class="muted small">Ohne Kopfzeile wird die Reihenfolge Vorname, Nachname, E-Mail, Bemerkung angenommen.
+    Dubletten (gleiche E-Mail, ohne E-Mail gleicher Name) werden übersprungen.</p>
+</div>
+{/include}

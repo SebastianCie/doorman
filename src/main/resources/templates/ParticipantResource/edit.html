@@ -1,0 +1,31 @@
+{#include base}
+{#title}{participant.fullName}{/title}
+<p><a href="/events/{event.id}#p{participant.id}">← {event.name}</a></p>
+<h1>{participant.fullName}</h1>
+<div class="two-col">
+  <form method="post" action="/events/{event.id}/participants/{participant.id}/edit" class="card stack">
+    <label>Vorname <input name="firstName" value="{participant.firstName ?: ''}" maxlength="100"></label>
+    <label>Nachname <input name="lastName" value="{participant.lastName ?: ''}" maxlength="100"></label>
+    <label>E-Mail <input name="email" type="email" value="{participant.email ?: ''}" maxlength="255"></label>
+    <label>Bemerkung <textarea name="note" rows="2">{participant.note ?: ''}</textarea></label>
+    <button class="btn primary">Speichern</button>
+  </form>
+  <div class="card stack center">
+    <img class="qr-preview" src="/events/{event.id}/participants/{participant.id}/qr.png" alt="QR-Code">
+    <code class="token">{participant.token}</code>
+    <div class="row-buttons center">
+      <button type="button" class="btn primary" data-copy-qr="/events/{event.id}/participants/{participant.id}/qr.png"
+              data-sent-url="/events/{event.id}/participants/{participant.id}/sent">QR kopieren</button>
+      <a class="btn" href="/events/{event.id}/participants/{participant.id}/qr.png?download=true">PNG herunterladen</a>
+    </div>
+    <form method="post" action="/events/{event.id}/participants/{participant.id}/new-token"
+          data-confirm="Neuen QR-Code erzeugen? Der bisherige Code wird sofort ungültig und muss neu verschickt werden.">
+      <button class="btn">Neuen QR-Code erzeugen</button>
+    </form>
+  </div>
+</div>
+<form method="post" action="/events/{event.id}/participants/{participant.id}/delete"
+      data-confirm="{participant.fullName} wirklich löschen?">
+  <button class="btn danger">Teilnehmer löschen</button>
+</form>
+{/include}
